@@ -12,7 +12,7 @@ class Watchlist extends BaseModel {
             return true; // Already in watchlist, consider it a success
         }
         
-        $sql = "INSERT INTO watchlist (user_id, lot_id, added_at) VALUES (:user_id, :lot_id, NOW())";
+        $sql = "INSERT INTO watchlist (user_id, lot_id, created_at) VALUES (:user_id, :lot_id, NOW())";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);

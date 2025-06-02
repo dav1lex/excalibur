@@ -94,6 +94,28 @@
                         <div class="col-6 text-primary fw-bold">$<?= number_format($lot['current_price']) ?></div>
                     </div>
                     
+                    <?php if (isset($user)): ?>
+                        <?php if ($inWatchlist): ?>
+                            <form action="<?= BASE_URL ?>watchlist/remove/<?= $lot['id'] ?>" method="post" class="mb-3">
+                                <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-bookmark-dash"></i> Remove from Watchlist
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <form action="<?= BASE_URL ?>watchlist/add/<?= $lot['id'] ?>" method="post" class="mb-3">
+                                <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
+                                <button type="submit" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-bookmark-plus"></i> Add to Watchlist
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    <?php else: // User not logged in ?>
+                        <a href="<?= BASE_URL ?>login?redirect=<?= urlencode(CURRENT_URL) ?>" class="btn btn-outline-secondary w-100 mb-3">
+                            <i class="bi bi-bookmark-plus"></i> Login to Add to Watchlist
+                        </a>
+                    <?php endif; ?>
+
                     <?php if ($auction['auction_status'] === 'live'): ?>
                         <hr>
                         <?php if (isset($user)): ?>
@@ -111,14 +133,6 @@
                                 </div>
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">Place Bid</button>
-                                    
-                                    <!-- Add to Watchlist Form -->
-                                    <form action="<?= BASE_URL ?>watchlist/add" method="post" class="mt-2">
-                                        <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
-                                        <button type="submit" class="btn btn-outline-secondary w-100">
-                                            <i class="bi bi-bookmark-plus"></i> Add to Watchlist
-                                        </button>
-                                    </form>
                                 </div>
                             </form>
                         <?php else: ?>
@@ -132,13 +146,6 @@
                         </div>
                         
                         <?php if (isset($user)): ?>
-                            <!-- Add to Watchlist Form -->
-                            <form action="<?= BASE_URL ?>watchlist/add" method="post" class="mt-3">
-                                <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
-                                <button type="submit" class="btn btn-outline-secondary w-100">
-                                    <i class="bi bi-bookmark-plus"></i> Add to Watchlist
-                                </button>
-                            </form>
                         <?php endif; ?>
                     <?php else: ?>
                         <div class="alert alert-secondary">

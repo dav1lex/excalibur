@@ -77,8 +77,8 @@ $router->get('/lots/delete', [LotController::class, 'delete']);
 
 // Bid routes
 $router->post('/bids/place', [BidController::class, 'place']);
-$router->post('/watchlist/add', [BidController::class, 'addToWatchlist']);
-$router->get('/watchlist/remove', [BidController::class, 'removeFromWatchlist']);
+$router->post('/watchlist/add/:id', [BidController::class, 'addToWatchlist']);
+$router->post('/watchlist/remove/:id', [BidController::class, 'removeFromWatchlist']);
 
 // 404 Not Found
 $router->notFound(function() {
