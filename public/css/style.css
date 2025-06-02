@@ -1,0 +1,127 @@
+/* Main Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Custom Button Styles */
+.btn-auction {
+    background-color: #6f42c1;
+    color: white;
+}
+
+.btn-auction:hover {
+    background-color: #5a32a3;
+    color: white;
+}
+
+/* Card Styles */
+.card-auction {
+    transition: transform 0.3s;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-auction:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Auction Timer */
+.auction-timer {
+    font-weight: bold;
+    color: #dc3545;
+}
+
+/* Bid History Table */
+.bid-history tr:last-child {
+    background-color: rgba(40, 167, 69, 0.2);
+}
+
+/* Watchlist Star */
+.watchlist-star {
+    color: #ffc107;
+    cursor: pointer;
+}
+
+.watchlist-star:hover {
+    color: #ffdb58;
+}
+
+/* Admin and User Dashboard Styles */
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 56px);
+    padding-top: 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: .5rem 1rem;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, .1);
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Stats Counter */
+.stats-counter {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* Responsive Sidebar */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        padding: 20px 0;
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+} 

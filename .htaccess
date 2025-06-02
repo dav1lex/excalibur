@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# Handle front controller pattern
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Security: Prevent directory listing
+Options -Indexes
+
+# Security: Prevent access to sensitive files
+<FilesMatch "^\.htaccess|config\.php|database\.sql">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Set default charset and language
+AddDefaultCharset UTF-8
+
+# PHP settings
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_value post_max_size 8M
+    php_value upload_max_filesize 6M
+</IfModule> 
