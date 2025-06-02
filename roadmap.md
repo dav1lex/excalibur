@@ -62,4 +62,7 @@
 - [x] Fixed missing admin/bids view and controller
 - [x] Fixed auction status updates to work automatically
 - [x] Fixed visibility of draft auctions (now hidden from public view)
-- [x] Fixed PDO binding in updateStatuses method 
+- [x] Fixed PDO binding in updateStatuses method
+- [x] Resolved issue with lot counts on admin auction page
+- [x] Fixed auction status not changing due to routing and controller logic
+- [x] Corrected lot update functionality (image, price, etc.) and redirect behavior 

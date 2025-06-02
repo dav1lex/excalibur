@@ -62,8 +62,39 @@
                             <button type="submit" class="btn btn-primary">Update User</button>
                         </div>
                     </form>
+                    <?php if (isset($_SESSION['user_id']) && $userData['id'] !== $_SESSION['user_id']): ?>
+                    <hr class="my-4">
+                    <div class="text-center">
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal<?= $userData['id'] ?>">
+                            <i class="bi bi-trash"></i> Delete User Account
+                        </button>
+                    </div>
+                    <?php endif; ?>
+
                 </div>
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<?php if (isset($_SESSION['user_id']) && $userData['id'] !== $_SESSION['user_id']): ?>
+<!-- Delete  Modal -->
+<div class="modal fade" id="deleteUserModal<?= $userData['id'] ?>" tabindex="-1" aria-labelledby="deleteUserModalLabel<?= $userData['id'] ?>" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel<?= $userData['id'] ?>">Confirm Delete User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete the user "<strong><?= htmlspecialchars($userData['name']) ?> (<?= htmlspecialchars($userData['email']) ?>)</strong>"?</p>
+                <p class="text-danger">This action cannot be undone. All associated data for this user (like bids) will also be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="<?= BASE_URL ?>admin/delete-user?id=<?= $userData['id'] ?>" class="btn btn-danger">Delete User Permanently</a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?> 

@@ -71,7 +71,7 @@
                                         <td><?= htmlspecialchars($auction['title']) ?></td>
                                         <td>
                                             <?php 
-                                            $badgeClass = 'bg-secondary';
+                                            $badgeClass = '';
                                             $badgeText = ucfirst($auction['status']);
                                             
                                             switch($auction['status']) {
@@ -87,6 +87,9 @@
                                                 case 'ended':
                                                     $badgeClass = 'bg-dark';
                                                     break;
+                                                default:
+                                                    $badgeClass = 'bg-secondary';
+                                                    break;
                                             }
                                             ?>
                                             <span class="badge <?= $badgeClass ?>">
@@ -96,10 +99,7 @@
                                         <td><?= date('M j, Y, g:i A', strtotime($auction['start_date'])) ?></td>
                                         <td><?= date('M j, Y, g:i A', strtotime($auction['end_date'])) ?></td>
                                         <td>
-                                            <?php 
-                                            $lotCount = isset($lotCounts[$auction['id']]) ? $lotCounts[$auction['id']] : 0;
-                                            echo $lotCount;
-                                            ?>
+                                            <?= $lotCounts[$auction['id']] ?? 0 ?>
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
@@ -112,14 +112,31 @@
                                                 <a href="<?= BASE_URL ?>lots/create?auction_id=<?= $auction['id'] ?>" class="btn btn-success" title="Add Lot">
                                                     <i class="bi bi-plus-circle"></i>
                                                 </a>
-                                                <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" 
-                                                   class="btn btn-danger" 
-                                                   onclick="return confirm('Are you sure you want to delete this auction? This cannot be undone.')" title="Delete">
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>" title="Delete">
                                                     <i class="bi bi-trash"></i>
-                                                </a>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
+
+                                    <!-- Delete Auction Modal -->
+                                    <div class="modal fade" id="deleteAuctionModal<?= $auction['id'] ?>" tabindex="-1" aria-labelledby="deleteAuctionModalLabel<?= $auction['id'] ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteAuctionModalLabel<?= $auction['id'] ?>">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the auction "<?= htmlspecialchars($auction['title']) ?>"? This action cannot be undone. Lots associated with this auction will also be deleted.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>

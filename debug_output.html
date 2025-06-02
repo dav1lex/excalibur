@@ -1,0 +1,46 @@
+<h1>Debug Information</h1><h2>Database Connection</h2>Connection Status: Connected<h2>Auctions Table</h2><pre>Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [title] => TEST AUCTION
+            [description] => auction description
+            [start_date] => 2025-06-02 21:35:00
+            [end_date] => 2025-06-09 21:35:00
+            [status] => live
+            [created_at] => 2025-06-02 21:35:34
+            [updated_at] => 2025-06-02 21:46:07
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [title] => test2
+            [description] => test2
+            [start_date] => 2025-06-03 21:59:00
+            [end_date] => 2025-06-17 21:59:00
+            [status] => upcoming
+            [created_at] => 2025-06-02 21:59:32
+            [updated_at] => 2025-06-02 21:59:32
+        )
+
+)
+</pre><h2>Lots Table</h2><pre>Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [auction_id] => 1
+            [title] => test title
+            [description] => test coni
+            [lot_number] => 1
+            [starting_price] => 1
+            [reserve_price] => 15
+            [current_price] => 125
+            [image_path] => public/uploads/lots/683dfd21108ce.jpg
+            [created_at] => 2025-06-02 21:36:01
+            [updated_at] => 2025-06-02 21:52:51
+        )
+
+)
+</pre><h2>Lot Counts by Auction</h2><table border='1'><tr><th>Auction ID</th><th>Auction Title</th><th>Lot Count</th><th>Direct SQL Count</th></tr><tr><td>1</td><td>TEST AUCTION</td><td>1</td><td>1</td></tr><tr><td>2</td><td>test2</td><td>0</td><td>0</td></tr></table><h2>Test Auction Status Update</h2><h3>Current Statuses</h3><table border='1'><tr><th>ID</th><th>Title</th><th>Status</th><th>Start Date</th><th>End Date</th></tr><tr><td>1</td><td>TEST AUCTION</td><td>live</td><td>2025-06-02 21:35:00</td><td>2025-06-09 21:35:00</td></tr><tr><td>2</td><td>test2</td><td>upcoming</td><td>2025-06-03 21:59:00</td><td>2025-06-17 21:59:00</td></tr></table><h3>Updated Statuses</h3><table border='1'><tr><th>ID</th><th>Title</th><th>Status</th><th>Start Date</th><th>End Date</th></tr><tr><td>1</td><td>TEST AUCTION</td><td>live</td><td>2025-06-02 21:35:00</td><td>2025-06-09 21:35:00</td></tr><tr><td>2</td><td>test2</td><td>upcoming</td><td>2025-06-03 21:59:00</td><td>2025-06-17 21:59:00</td></tr></table><h2>Edit Auction Form</h2>URL Format: <code>http://localhost/auctions/edit/[auction_id]</code> 

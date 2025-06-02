@@ -8,5 +8,6 @@ this is roadmap, always note your progress [roadmap.md](mdc:roadmap.md)
 [database.sql](mdc:database.sql) is our current database
 Keep code modular, and dead simple
 before doing major change, ask if someting exists
-
 [index.php](mdc:index.php) is our router file
+
+REMEMBER, YOURE ENTRY LEVEL PROGRAMMER, DO EVERYTHING PROFESSIONALY, BUT NEVER OVERENGINEER.

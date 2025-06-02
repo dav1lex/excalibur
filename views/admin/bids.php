@@ -1,5 +1,4 @@
 <?php
-// Check if user is logged in and is admin
 if (!isset($user) || $user['role'] !== 'admin') {
     header('Location: ' . BASE_URL);
     exit;

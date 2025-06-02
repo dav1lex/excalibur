@@ -176,9 +176,12 @@ class Lot extends BaseModel {
      * Count lots by auction ID
      */
     public function countByAuction($auction_id) {
-        $sql = "SELECT COUNT(*) FROM lots WHERE auction_id = :auction_id";
+        // Cast auction_id to integer to ensure proper comparison
+        $auction_id = (int)$auction_id;
+        
+        $sql = "SELECT COUNT(*) FROM lots WHERE auction_id = ?";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':auction_id', $auction_id, PDO::PARAM_INT);
+        $stmt->bindParam(1, $auction_id, PDO::PARAM_INT);
         $stmt->execute();
         
         return $stmt->fetchColumn();

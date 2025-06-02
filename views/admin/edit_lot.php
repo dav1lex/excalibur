@@ -36,7 +36,7 @@
                 <h5 class="mb-0">Lot Details for: <?= htmlspecialchars($auction['title']) ?></h5>
             </div>
             <div class="card-body">
-                <form action="<?= BASE_URL ?>lots/update?id=<?= $lot['id'] ?>" method="post" enctype="multipart/form-data">
+                <form action="<?= BASE_URL ?>lots/update/<?= $lot['id'] ?>" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="auction_id" value="<?= $lot['auction_id'] ?>">
                     
                     <div class="mb-3">

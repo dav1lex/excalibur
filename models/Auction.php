@@ -123,22 +123,25 @@ class Auction extends BaseModel {
      * Update an auction
      */
     public function update($id, $data) {
-        $sql = "UPDATE auctions SET 
-                title = :title,
-                description = :description,
-                start_date = :start_date,
-                end_date = :end_date,
-                status = :status,
-                updated_at = NOW()
-                WHERE id = :id";
+        // Build dynamic update query
+        $fields = [];
+        $params = [':id' => $id];
         
+        // Dynamically build the SET clause based on provided data
+        foreach ($data as $key => $value) {
+            $fields[] = "$key = :$key";
+            $params[":$key"] = $value;
+        }
+        
+        $fields[] = "updated_at = NOW()";
+        
+        $sql = "UPDATE auctions SET " . implode(', ', $fields) . " WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':title', $data['title']);
-        $stmt->bindParam(':description', $data['description']);
-        $stmt->bindParam(':start_date', $data['start_date']);
-        $stmt->bindParam(':end_date', $data['end_date']);
-        $stmt->bindParam(':status', $data['status']);
+        
+        foreach ($params as $param => &$value) {
+            $type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+            $stmt->bindParam($param, $value, $type);
+        }
         
         return $stmt->execute();
     }
@@ -181,32 +184,23 @@ class Auction extends BaseModel {
     /**
      * Update auction statuses based on current time
      * This should be called regularly via cron or at application start
+     * Note: This will NEVER change 'draft' status auctions - those must be changed manually
      */
     public function updateStatuses() {
         $now = date('Y-m-d H:i:s');
         
-        // Update draft auctions that should be upcoming
-        $sql = "UPDATE auctions SET status = 'upcoming', updated_at = NOW() 
-                WHERE status = 'draft' AND start_date > ? 
-                AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) > 5";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(1, $now);
-        $stmt->execute();
-        
-        // Update to live
+        // Update 'upcoming' auctions to 'live' when start date is reached
         $sql = "UPDATE auctions SET status = 'live', updated_at = NOW() 
-                WHERE (status = 'upcoming' OR status = 'draft') 
-                AND start_date <= ? AND end_date >= ?
-                AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) > 5";
+                WHERE status = 'upcoming' 
+                AND start_date <= ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(1, $now);
-        $stmt->bindParam(2, $now);
         $stmt->execute();
         
-        // Update to ended
+        // Update 'live' auctions to 'ended' when end date is passed
         $sql = "UPDATE auctions SET status = 'ended', updated_at = NOW() 
-                WHERE status != 'ended' AND end_date < ?
-                AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) > 5";
+                WHERE status = 'live'
+                AND end_date < ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(1, $now);
         $stmt->execute();

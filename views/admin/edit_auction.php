@@ -36,7 +36,7 @@
                 <h5 class="mb-0">Auction Details</h5>
             </div>
             <div class="card-body">
-                <form action="<?= BASE_URL ?>auctions/update?id=<?= $auction['id'] ?>" method="post">
+                <form action="<?= BASE_URL ?>auctions/update/<?= $auction['id'] ?>" method="post">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($auction['title']) ?>" required>
@@ -90,11 +90,28 @@
                     <a href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>" class="btn btn-info">
                         <i class="bi bi-eye"></i> View Auction Page
                     </a>
-                    <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" class="btn btn-danger" 
-                       onclick="return confirm('Are you sure you want to delete this auction? This cannot be undone.')">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>">
                         <i class="bi bi-trash"></i> Delete Auction
-                    </a>
+                    </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Delete modal -->
+<div class="modal fade" id="deleteAuctionModal<?= $auction['id'] ?>" tabindex="-1" aria-labelledby="deleteAuctionModalLabel<?= $auction['id'] ?>" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAuctionModalLabel<?= $auction['id'] ?>">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the auction "<?= htmlspecialchars($auction['title']) ?>"? This action cannot be undone. Lots associated with this auction will also be deleted.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
             </div>
         </div>
     </div>

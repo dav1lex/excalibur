@@ -10,11 +10,13 @@ class LotController extends BaseController {
     private $lotModel;
     private $auctionModel;
     private $userModel;
+    private $bidModel;
     
     public function __construct() {
         $this->lotModel = new Lot();
         $this->auctionModel = new Auction();
         $this->userModel = new User();
+        $this->bidModel = new Bid();
     }
     
     /**
@@ -238,9 +240,14 @@ class LotController extends BaseController {
             $this->redirect(BASE_URL);
             return;
         }
+
+        // If id is not in the path, get it from query params
+        if (!$id && isset($_GET['id'])) {
+            $id = (int)$_GET['id'];
+        }
         
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) {
-            $this->redirect(BASE_URL . 'admin/auctions');
+            $this->redirect(BASE_URL . 'admin/auctions'); // Or perhaps admin/lots
             return;
         }
         
@@ -277,6 +284,15 @@ class LotController extends BaseController {
             'starting_price' => $starting_price,
             'reserve_price' => $reserve_price
         ];
+        
+        // If starting_price is being changed AND there are no bids on this lot,
+        // then current_price should also be updated to the new starting_price.
+        if (isset($lotData['starting_price']) && $lotData['starting_price'] != $lot['starting_price']) {
+            $bidCount = $this->bidModel->countByLot($id);
+            if ($bidCount == 0) {
+                $lotData['current_price'] = $lotData['starting_price'];
+            }
+        }
         
         // Process image if uploaded
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -325,7 +341,7 @@ class LotController extends BaseController {
         
         if ($result) {
             $this->setSuccessMessage('Lot updated successfully');
-            $this->redirect(BASE_URL . 'admin/lots?auction_id=' . $auction_id);
+            $this->redirect(BASE_URL . 'lots/edit/' . $id);
         } else {
             $this->setErrorMessage('Error updating lot');
             $this->redirect(BASE_URL . 'lots/edit/' . $id);

@@ -66,11 +66,6 @@
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="<?= BASE_URL ?>admin/edit-user?id=<?= $userData['id'] ?>" class="btn btn-primary">Edit</a>
-                                                <?php if ($userData['id'] !== $_SESSION['user_id']): ?>
-                                                    <a href="<?= BASE_URL ?>admin/delete-user?id=<?= $userData['id'] ?>" 
-                                                       class="btn btn-danger" 
-                                                       onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
-                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

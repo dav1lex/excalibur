@@ -199,6 +199,7 @@ class AdminController extends BaseController
 
     public function auctions()
     {
+        error_log('ADMINCONTROLLER AUCTIONS METHOD REACHED - TOP'); // Basic check
         if (!$this->isAdmin()) {
             $this->setErrorMessage('Access denied. Admin privileges required.');
             $this->redirect(BASE_URL);
@@ -206,18 +207,28 @@ class AdminController extends BaseController
         }
 
         $status = isset($_GET['status']) ? $_GET['status'] : null;
+        error_log('AdminController: auctions() method. Status filter from GET: ' . print_r($status, true));
 
         if ($status) {
             $auctions = $this->auctionModel->getByStatus($status);
+            error_log('AdminController: Fetched auctions WITH status filter (' . $status . '): ' . print_r($auctions, true));
         } else {
             $auctions = $this->auctionModel->getAll();
+            error_log('AdminController: Fetched auctions WITHOUT status filter: ' . print_r($auctions, true));
         }
 
+        // Count lots for each auction
         $lotCounts = [];
-        foreach ($auctions as $auction) {
-            $auction_id = (int)$auction['id'];
-            $lotCounts[$auction_id] = $this->lotModel->countByAuction($auction_id);
+        if (!empty($auctions)) {
+            foreach ($auctions as $auction) {
+                $auction_id = $auction['id'];
+                $count = $this->lotModel->countByAuction($auction_id);
+                error_log("AdminController: Lot count for auction ID {$auction_id}: {$count}");
+                $lotCounts[$auction_id] = $count;
+            }
         }
+        error_log('AdminController: Final lotCounts array: ' . print_r($lotCounts, true));
+        error_log('AdminController: Current filter for view: ' . ($status ?? 'all'));
 
         $this->render('admin/auctions', [
             'title' => 'Manage Auctions - ' . SITE_NAME,
@@ -272,32 +283,25 @@ class AdminController extends BaseController
             return;
         }
         
+        $lot_id = $bid['lot_id']; // Store lot_id before bid is deleted
+
         // Delete the bid
         if ($this->bidModel->delete($id)) {
-            // If this was a winning bid, we might need to update the lot's current_bid
-            if ($bid['status'] === 'winning') {
-                // Find the next highest bid for this lot
-                $nextHighestBid = $this->bidModel->getHighestBidForLot($bid['lot_id'], $id);
-                
-                if ($nextHighestBid) {
-                    // Update the next highest bid to winning status
-                    $this->bidModel->update($nextHighestBid['id'], ['status' => 'winning']);
-                    
-                    // Update the lot's current bid
-                    $this->lotModel->update($bid['lot_id'], [
-                        'current_bid' => $nextHighestBid['amount'],
-                        'current_bidder_id' => $nextHighestBid['user_id']
-                    ]);
-                } else {
-                    // No other bids, reset the lot
-                    $this->lotModel->update($bid['lot_id'], [
-                        'current_bid' => null,
-                        'current_bidder_id' => null
-                    ]);
+            // After deleting a bid, always recalculate the lot's current price
+            $newHighestBid = $this->bidModel->getHighestBidForLot($lot_id);
+            
+            if ($newHighestBid) {
+                // If there are other bids, set current_price to the new highest bid amount
+                $this->lotModel->update($lot_id, ['current_price' => $newHighestBid['amount']]);
+            } else {
+                // If no bids remain, set current_price back to starting_price
+                $lotDetails = $this->lotModel->getById($lot_id);
+                if ($lotDetails) {
+                    $this->lotModel->update($lot_id, ['current_price' => $lotDetails['starting_price']]);
                 }
             }
             
-            $this->setSuccessMessage('Bid deleted successfully.');
+            $this->setSuccessMessage('Bid deleted successfully. Lot current price updated.');
         } else {
             $this->setErrorMessage('Error deleting bid. Please try again.');
         }

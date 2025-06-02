@@ -205,7 +205,12 @@ class AuctionController extends BaseController {
             $this->redirect(BASE_URL);
             return;
         }
-        
+
+        // If id is not in the path, get it from query params
+        if (!$id && isset($_GET['id'])) {
+            $id = (int)$_GET['id'];
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) {
             $this->redirect(BASE_URL . 'admin/auctions');
             return;

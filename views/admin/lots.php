@@ -119,8 +119,8 @@
                                         <td><?= htmlspecialchars($lot['title']) ?></td>
                                         <td><?= htmlspecialchars($lot['lot_number']) ?></td>
                                         <td><?= htmlspecialchars($lot['title']) ?></td>
-                                        <td>$<?= number_format($lot['starting_price']) ?></td>
-                                        <td>$<?= number_format($lot['current_price']) ?></td>
+                                        <td style="font-weight: bold;"><?= number_format($lot['starting_price']) ?>€</td>
+                                        <td style="font-weight: bold;"><?= number_format($lot['current_price']) ?>€</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="<?= BASE_URL ?>lots/view?id=<?= $lot['id'] ?>" class="btn btn-info" title="View">
@@ -129,14 +129,29 @@
                                                 <a href="<?= BASE_URL ?>lots/edit?id=<?= $lot['id'] ?>" class="btn btn-primary" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
-                                                <a href="<?= BASE_URL ?>lots/delete?id=<?= $lot['id'] ?>" 
-                                                   class="btn btn-danger" 
-                                                   onclick="return confirm('Are you sure you want to delete this lot? This cannot be undone.')" title="Delete">
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteLotModal<?= $lot['id'] ?>" title="Delete">
                                                     <i class="bi bi-trash"></i>
-                                                </a>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
+                                    <div class="modal fade" id="deleteLotModal<?= $lot['id'] ?>" tabindex="-1" aria-labelledby="deleteLotModalLabel<?= $lot['id'] ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteLotModalLabel<?= $lot['id'] ?>">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the lot "<?= htmlspecialchars($lot['title']) ?>"? This action cannot be undone.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="<?= BASE_URL ?>lots/delete?id=<?= $lot['id'] ?>" class="btn btn-danger">Delete Lot</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>

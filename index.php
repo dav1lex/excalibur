@@ -1,4 +1,5 @@
 <?php
+error_log('INDEX.PHP ROUTER REACHED - TOP'); // Basic check to see if error logging works
 // Start session
 session_start();
 
@@ -58,12 +59,11 @@ $router->get('/user/watchlist', [BidController::class, 'watchlist']);
 // Auction routes
 $router->get('/auctions', [AuctionController::class, 'index']);
 $router->get('/auctions/view', [AuctionController::class, 'view']);
-$router->get('/admin/auctions', [AuctionController::class, 'manage']);
 $router->get('/auctions/create', [AuctionController::class, 'create']);
 $router->post('/auctions/store', [AuctionController::class, 'store']);
 $router->get('/auctions/edit', [AuctionController::class, 'edit']);
 $router->get('/auctions/edit/:id', [AuctionController::class, 'edit']);
-$router->post('/auctions/update', [AuctionController::class, 'update']);
+$router->post('/auctions/update/:id', [AuctionController::class, 'update']);
 $router->get('/auctions/delete', [AuctionController::class, 'delete']);
 
 // Lot routes
@@ -72,7 +72,7 @@ $router->get('/lots/create', [LotController::class, 'create']);
 $router->post('/lots/store', [LotController::class, 'store']);
 $router->get('/lots/edit', [LotController::class, 'edit']);
 $router->get('/lots/edit/:id', [LotController::class, 'edit']);
-$router->post('/lots/update', [LotController::class, 'update']);
+$router->post('/lots/update/:id', [LotController::class, 'update']);
 $router->get('/lots/delete', [LotController::class, 'delete']);
 
 // Bid routes
