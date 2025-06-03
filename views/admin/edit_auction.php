@@ -36,7 +36,7 @@
                 <h5 class="mb-0">Auction Details</h5>
             </div>
             <div class="card-body">
-                <form action="<?= BASE_URL ?>auctions/update/<?= $auction['id'] ?>" method="post">
+                <form action="<?= BASE_URL ?>auctions/update/<?= $auction['id'] ?>" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($auction['title']) ?>" required>
@@ -45,6 +45,20 @@
                     <div class="mb-3">
                         <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="description" name="description" rows="5" required><?= htmlspecialchars($auction['description']) ?></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="auction_image" class="form-label">Auction Image</label>
+                        <?php if (!empty($auction['image_path'])): ?>
+                            <div class="mb-2">
+                                <img src="<?= BASE_URL . htmlspecialchars($auction['image_path']) ?>" alt="Current auction image" class="img-thumbnail" style="max-height: 200px;">
+                                <p class="form-text">Current image. Upload a new one to replace it.</p>
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" class="form-control" id="auction_image" name="auction_image" accept="image/jpeg,image/png,image/jpg">
+                        <div class="form-text">
+                            Optional. Maximum size: 6MB. Formats: JPG, PNG.
+                        </div>
                     </div>
                     
                     <div class="row">

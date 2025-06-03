@@ -37,6 +37,37 @@ footer {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* General card styles */
+.card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+
+/* Status badges */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.8em;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+    color: white;
+}
+
+.badge.bg-dark {
+    background-color: #343a40 !important;
+}
+
 /* Auction Timer */
 .auction-timer {
     font-weight: bold;
@@ -125,3 +156,58 @@ footer {
         transform: translateX(0);
     }
 } 
+
+.timer-block {
+    min-width: 70px;
+}
+
+.timer-block small {
+    font-size: 0.75em;
+}
+
+@media (max-width: 768px) {
+    .auction-timer-container h5 {
+        font-size: 1.1rem;
+    }
+
+    .timer-block {
+        min-width: 60px;
+        padding: 0.4rem !important;
+    }
+
+    .timer-block .h4 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .timer-block {
+        min-width: 50px;
+        padding: 0.3rem !important;
+    }
+
+    .timer-block .h4 {
+        font-size: 1rem;
+    }
+
+    .auction-timer-container h5 {
+        font-size: 1rem;
+    }
+}
+
+/* Lot card  */
+.lot-card .card-title {
+    font-size: 1.1rem;
+}
+
+.lot-card .card-img-top {
+    border-bottom: 1px solid #eee;
+}
+
+.lot-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.list-group-flush .list-group-item.ps-0 {
+    padding-left: 0;
+}

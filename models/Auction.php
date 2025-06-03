@@ -102,8 +102,8 @@ class Auction extends BaseModel {
      * Create a new auction
      */
     public function create($data) {
-        $sql = "INSERT INTO auctions (title, description, start_date, end_date, status, created_at, updated_at) 
-                VALUES (:title, :description, :start_date, :end_date, :status, NOW(), NOW())";
+        $sql = "INSERT INTO auctions (title, description, start_date, end_date, status, image_path, created_at, updated_at) 
+                VALUES (:title, :description, :start_date, :end_date, :status, :image_path, NOW(), NOW())";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':title', $data['title']);
@@ -111,6 +111,7 @@ class Auction extends BaseModel {
         $stmt->bindParam(':start_date', $data['start_date']);
         $stmt->bindParam(':end_date', $data['end_date']);
         $stmt->bindParam(':status', $data['status']);
+        $stmt->bindParam(':image_path', $data['image_path']);
         
         if ($stmt->execute()) {
             return $this->conn->lastInsertId();

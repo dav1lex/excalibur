@@ -10,4 +10,4 @@ Keep code modular, and dead simple
 before doing major change, ask if someting exists
 [index.php](mdc:index.php) is our router file
 
-REMEMBER, YOURE ENTRY LEVEL PROGRAMMER, DO EVERYTHING PROFESSIONALY, BUT NEVER OVERENGINEER.
+**GOLDEN RULE: REMEMBER, YOURE ENTRY LEVEL PROGRAMMER, DO EVERYTHING PROFESSIONALY, BUT NEVER OVERENGINEER.

@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     start_date DATETIME NOT NULL,
     end_date DATETIME NOT NULL,
     status ENUM('draft', 'upcoming', 'live', 'ended') DEFAULT 'draft',
+    image_path VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

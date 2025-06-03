@@ -138,6 +138,7 @@ class AuctionController extends BaseController
         $start_date = $_POST['start_date'] ?? '';
         $end_date = $_POST['end_date'] ?? '';
         $status = $_POST['status'] ?? 'draft';
+        $image_path = null;
 
         // Basic validation
         if (empty($title) || empty($description) || empty($start_date) || empty($end_date)) {
@@ -146,13 +147,24 @@ class AuctionController extends BaseController
             return;
         }
 
+        // Handle image upload if present
+        if (isset($_FILES['auction_image']) && $_FILES['auction_image']['error'] === UPLOAD_ERR_OK) {
+            $image_path = $this->handleImageUpload($_FILES['auction_image'], 'auctions');
+            if (!$image_path) {
+                $this->setErrorMessage('Error uploading image. Please try again.');
+                $this->redirect(BASE_URL . 'auctions/create');
+                return;
+            }
+        }
+
         // Create auction
         $auctionId = $this->auctionModel->create([
             'title' => $title,
             'description' => $description,
             'start_date' => $start_date,
             'end_date' => $end_date,
-            'status' => $status
+            'status' => $status,
+            'image_path' => $image_path
         ]);
 
         if ($auctionId) {
@@ -237,13 +249,33 @@ class AuctionController extends BaseController
             return;
         }
 
+        // Get current auction data for image comparison
+        $currentAuction = $this->auctionModel->getById($id);
+        $image_path = $currentAuction['image_path'];
+
+        // Handle image upload if present
+        if (isset($_FILES['auction_image']) && $_FILES['auction_image']['error'] === UPLOAD_ERR_OK) {
+            // Delete old image if exists
+            if (!empty($image_path) && file_exists($image_path)) {
+                @unlink($image_path);
+            }
+            
+            $image_path = $this->handleImageUpload($_FILES['auction_image'], 'auctions');
+            if (!$image_path) {
+                $this->setErrorMessage('Error uploading image. Please try again.');
+                $this->redirect(BASE_URL . 'auctions/edit/' . $id);
+                return;
+            }
+        }
+
         // Update auction
         $result = $this->auctionModel->update($id, [
             'title' => $title,
             'description' => $description,
             'start_date' => $start_date,
             'end_date' => $end_date,
-            'status' => $status
+            'status' => $status,
+            'image_path' => $image_path
         ]);
 
         if ($result) {
@@ -253,6 +285,41 @@ class AuctionController extends BaseController
         }
 
         $this->redirect(BASE_URL . 'auctions/edit/' . $id);
+    }
+
+    /**
+     * Handle image upload for auctions
+     */
+    private function handleImageUpload($file, $folder)
+    {
+        $upload_dir = 'uploads/' . $folder . '/';
+        
+        // Create directory if it doesn't exist
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        
+        // Check file size (6MB max)
+        if ($file['size'] > 6 * 1024 * 1024) {
+            return false;
+        }
+        
+        // Check file type
+        $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!in_array($file['type'], $allowed_types)) {
+            return false;
+        }
+        
+        // Generate unique filename
+        $filename = uniqid() . '_' . basename($file['name']);
+        $filepath = $upload_dir . $filename;
+        
+        // Move uploaded file
+        if (move_uploaded_file($file['tmp_name'], $filepath)) {
+            return $filepath;
+        }
+        
+        return false;
     }
 
     /**

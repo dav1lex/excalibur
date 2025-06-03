@@ -1,6 +1,7 @@
 <div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
+    <!-- Breadcrumbs and Messages -->
+    <div class="row mb-3">
+        <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="<?= BASE_URL ?>auctions">Auctions</a></li>
@@ -8,8 +9,6 @@
                     <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($lot['title']) ?></li>
                 </ol>
             </nav>
-            <h1 class="display-5 mb-2"><?= htmlspecialchars($lot['title']) ?></h1>
-            <p class="text-muted">Lot #<?= htmlspecialchars($lot['lot_number']) ?></p>
             
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert alert-success alert-dismissible fade show">
@@ -27,7 +26,15 @@
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
         </div>
-        <div class="col-md-4 text-end">
+    </div>
+
+    <!-- Lot Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h2 mb-1"><?= htmlspecialchars($lot['title']) ?></h1>
+            <p class="text-muted mb-2">Lot #<?= htmlspecialchars($lot['lot_number']) ?></p>
+        </div>
+        <div class="col-md-4 text-md-end">
             <?php 
             $badgeClass = 'bg-secondary';
             $badgeText = 'Draft';
@@ -47,12 +54,12 @@
             <div class="d-block">
                 <?php if ($auction['auction_status'] === 'upcoming'): ?>
                     <div class="text-muted">
-                        Starts: <?= date('M j, Y, g:i A', strtotime($auction['auction_start_date'])) ?>
+                        <i class="bi bi-calendar-event me-1"></i> Starts: <?= date('M j, Y, g:i A', strtotime($auction['auction_start_date'])) ?>
                     </div>
                 <?php elseif ($auction['auction_status'] === 'live'): ?>
                     <div class="text-danger fw-bold">
-                        Ends: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
-                        <div class="auction-timer" data-end="<?= $auction['auction_end_date'] ?>">
+                        <i class="bi bi-alarm me-1"></i> Ends: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
+                        <div class="auction-timer border rounded bg-light p-2 mt-1 text-center" data-end="<?= $auction['auction_end_date'] ?>">
                             <span class="days">00</span>d
                             <span class="hours">00</span>h
                             <span class="minutes">00</span>m
@@ -61,37 +68,60 @@
                     </div>
                 <?php else: ?>
                     <div class="text-muted">
-                        Ended: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
+                        <i class="bi bi-calendar-check me-1"></i> Ended: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 
+    <!-- Main Content: Image and Bidding -->
     <div class="row mb-4">
-        <div class="col-md-6">
-            <?php if (!empty($lot['image_path'])): ?>
-                <img src="<?= BASE_URL . htmlspecialchars($lot['image_path']) ?>" class="img-fluid rounded shadow-sm" alt="<?= htmlspecialchars($lot['title']) ?>">
-            <?php else: ?>
-                <div class="bg-light text-center py-5 rounded">
-                    <i class="bi bi-image text-muted" style="font-size: 10rem;"></i>
-                    <p class="text-muted">No image available</p>
+        <!-- Image Column -->
+        <div class="col-md-7 mb-4 mb-md-0">
+            <div class="card border-0">
+                <div class="card-body p-0">
+                    <?php if (!empty($lot['image_path'])): ?>
+                        <div class="image-container text-center bg-light rounded p-3" style="max-height: 500px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            <img src="<?= BASE_URL . htmlspecialchars($lot['image_path']) ?>" 
+                                 class="img-fluid" 
+                                 alt="<?= htmlspecialchars($lot['title']) ?>"
+                                 style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                        </div>
+                    <?php else: ?>
+                        <div class="bg-light text-center py-5 rounded">
+                            <i class="bi bi-image text-muted" style="font-size: 8rem;"></i>
+                            <p class="text-muted mt-3">No image available</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
+            </div>
+            
+            <!-- Description Card -->
+            <div class="card mt-4">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">Bidding Information</h5>
+                    <h5 class="mb-0">Description</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-6 fw-bold">Starting Price:</div>
-                        <div class="col-6">$<?= number_format($lot['starting_price']) ?></div>
+                    <p class="card-text"><?= nl2br(htmlspecialchars($lot['description'])) ?></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bidding Column -->
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Bidding Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                        <span class="fw-bold">Starting Price:</span>
+                        <span>$<?= number_format($lot['starting_price']) ?></span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6 fw-bold">Current Bid:</div>
-                        <div class="col-6 text-primary fw-bold">$<?= number_format($lot['current_price']) ?></div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                        <span class="fw-bold">Current Bid:</span>
+                        <span class="fs-4 text-primary fw-bold">$<?= number_format($lot['current_price']) ?></span>
                     </div>
                     
                     <?php if (isset($user)): ?>
@@ -120,7 +150,6 @@
                         <hr>
                         <?php if (isset($user)): ?>
                             <?php 
-                            // Calculate minimum bid based on the current price
                             $bidModel = new Bid();
                             $minimumBid = $bidModel->getNextMinimumBid($lot['current_price']);
                             $increment = $bidModel->getBidIncrement($lot['current_price']);
@@ -128,20 +157,20 @@
                             <form action="<?= BASE_URL ?>bids/place" method="post" class="mt-3">
                                 <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
                                 <div class="mb-3">
-                                    <label for="bid_amount" class="form-label">Your Bid Amount (€)</label>
+                                    <label for="bid_amount" class="form-label">Your Bid Amount ($)</label>
                                     <input type="number" class="form-control" id="bid_amount" name="bid_amount" min="<?= $minimumBid ?>" value="<?= $minimumBid ?>" required>
-                                    <div class="form-text">Minimum bid: <?= number_format($minimumBid) ?>€ (Increment: <?= $increment ?>€)</div>
+                                    <div class="form-text">Minimum bid: $<?= number_format($minimumBid) ?> (Increment: $<?= $increment ?>)</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="max_amount" class="form-label">Maximum Bid Amount (Optional)</label>
                                     <input type="number" class="form-control" id="max_amount" name="max_amount" min="<?= $minimumBid ?>">
-                                    <div class="form-text">Set a maximum amount for proxy bidding. The system will automatically bid on your behalf up to this amount.</div>
+                                    <div class="form-text">Set a maximum amount for proxy bidding.</div>
                                 </div>
                                 <div class="alert alert-info mb-3">
-                                    <strong><i class="bi bi-info-circle"></i> Proxy Bidding:</strong> If you set a maximum bid, the system will only bid as much as needed to outbid others (using the appropriate increments), up to your maximum. Your maximum amount stays confidential.
+                                    <strong><i class="bi bi-info-circle"></i> Proxy Bidding:</strong> The system will bid on your behalf up to your maximum amount, as needed to outbid others.
                                 </div>
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">Place Bid</button>
+                                    <button type="submit" class="btn btn-primary btn-lg">Place Bid</button>
                                 </div>
                             </form>
                         <?php else: ?>
@@ -151,43 +180,25 @@
                         <?php endif; ?>
                     <?php elseif ($auction['auction_status'] === 'upcoming'): ?>
                         <div class="alert alert-info">
-                            Bidding will open when the auction starts.
+                            <i class="bi bi-info-circle me-2"></i> Bidding will open when the auction starts.
                         </div>
-                        
-                        <?php if (isset($user)): ?>
-                        <?php endif; ?>
                     <?php else: ?>
                         <div class="alert alert-secondary">
-                            This auction has ended.
+                            <i class="bi bi-exclamation-circle me-2"></i> This auction has ended.
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Description</h5>
-                    <p class="card-text"><?= nl2br(htmlspecialchars($lot['description'])) ?></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <?php if (!empty($bids)): ?>
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
+            
+            <?php if (!empty($bids)): ?>
+            <div class="card">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">Bid History</h5>
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Bid History</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Date</th>
                                     <th>Bidder</th>
@@ -197,7 +208,7 @@
                             <tbody>
                                 <?php foreach ($bids as $bid): ?>
                                     <tr>
-                                        <td><?= date('M j, Y, g:i A', strtotime($bid['placed_at'])) ?></td>
+                                        <td><?= date('M j, g:i A', strtotime($bid['placed_at'])) ?></td>
                                         <td>
                                             <?php 
                                             // Show partial name for privacy
@@ -207,7 +218,7 @@
                                             echo $first_name . ' ' . $last_initial;
                                             ?>
                                         </td>
-                                        <td>$<?= number_format($bid['amount']) ?></td>
+                                        <td class="fw-bold">$<?= number_format($bid['amount']) ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -215,34 +226,35 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
     </div>
-    <?php endif; ?>
 
     <?php if (!empty($relatedLots)): ?>
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <h2 class="h4 mb-3">Other Lots in this Auction</h2>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <h2 class="h4 mb-3 border-bottom pb-2">Other Lots in this Auction</h2>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
                 <?php foreach ($relatedLots as $relatedLot): ?>
                     <div class="col">
-                        <div class="card h-100 card-auction">
-                            <?php if (!empty($relatedLot['image_path'])): ?>
-                                <img src="<?= BASE_URL . htmlspecialchars($relatedLot['image_path']) ?>" class="card-img-top" alt="<?= htmlspecialchars($relatedLot['title']) ?>" style="height: 150px; object-fit: cover;">
-                            <?php else: ?>
-                                <div class="bg-light text-center py-3">
-                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <div class="card-body">
-                                <h5 class="card-title small"><?= htmlspecialchars($relatedLot['title']) ?></h5>
-                                <p class="card-text small">
-                                    <strong>Current Bid:</strong> $<?= number_format($relatedLot['current_price']) ?>
-                                </p>
+                        <div class="card h-100">
+                            <div style="height: 140px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                <?php if (!empty($relatedLot['image_path'])): ?>
+                                    <img src="<?= BASE_URL . htmlspecialchars($relatedLot['image_path']) ?>" 
+                                         class="img-fluid" 
+                                         alt="<?= htmlspecialchars($relatedLot['title']) ?>"
+                                         style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                                <?php else: ?>
+                                    <i class="bi bi-image text-secondary" style="font-size: 2rem;"></i>
+                                <?php endif; ?>
                             </div>
-                            <div class="card-footer bg-white border-top-0 p-2">
-                                <a href="<?= BASE_URL ?>lots/view?id=<?= $relatedLot['id'] ?>" class="btn btn-sm btn-outline-primary w-100">View</a>
+                            
+                            <div class="card-body p-2">
+                                <h6 class="card-title text-truncate" title="<?= htmlspecialchars($relatedLot['title']) ?>"><?= htmlspecialchars($relatedLot['title']) ?></h6>
+                                <p class="card-text small mb-1">
+                                    <strong>Current:</strong> $<?= number_format($relatedLot['current_price']) ?>
+                                </p>
+                                <a href="<?= BASE_URL ?>lots/view?id=<?= $relatedLot['id'] ?>" class="btn btn-sm btn-outline-primary w-100">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -266,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const distance = endTime - now;
             
             if (distance < 0) {
-                timer.innerHTML = 'Auction has ended';
+                timer.innerHTML = '<span class="badge bg-danger">Auction has ended</span>';
                 return;
             }
             
