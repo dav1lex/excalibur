@@ -41,6 +41,9 @@ $router->post('/login', [AuthController::class, 'loginPost']);
 $router->get('/register', [AuthController::class, 'register']);
 $router->post('/register', [AuthController::class, 'registerPost']);
 $router->get('/logout', [AuthController::class, 'logout']);
+$router->get('/confirm-email', [AuthController::class, 'confirmEmail']);
+$router->get('/resend-confirmation', [AuthController::class, 'resendConfirmation']);
+$router->post('/resend-confirmation-post', [AuthController::class, 'resendConfirmationPost']);
 
 // Admin 
 $router->get('/admin/dashboard', [AdminController::class, 'dashboard']);

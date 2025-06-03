@@ -1,12 +1,15 @@
 <?php
 require_once 'controllers/BaseController.php';
 require_once 'models/User.php';
+require_once 'utils/EmailService.php';
 
 class AuthController extends BaseController {
     private $userModel;
+    private $emailService;
     
     public function __construct() {
         $this->userModel = new User();
+        $this->emailService = new EmailService();
     }
     
     public function login() {
@@ -40,7 +43,11 @@ class AuthController extends BaseController {
         // Attempt login
         $user = $this->userModel->validateLogin($email, $password);
         
-        if ($user) {
+        if ($user === 'unconfirmed') {
+            $this->setErrorMessage('Please confirm your email address before logging in');
+            $this->redirect(BASE_URL . 'login');
+            return;
+        } elseif ($user) {
             // Set session variables
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
@@ -52,6 +59,7 @@ class AuthController extends BaseController {
         } else {
             $this->setErrorMessage('Invalid email or password');
             $this->redirect(BASE_URL . 'login');
+            return;
         }
     }
     
@@ -99,14 +107,98 @@ class AuthController extends BaseController {
         }
         
         // Create new user
-        $userId = $this->userModel->create($name, $email, $password);
+        $result = $this->userModel->create($name, $email, $password);
         
-        if ($userId) {
-            $this->setSuccessMessage('Registration successful. You can now login.');
+        if ($result) {
+            // Send confirmation email
+            if ($this->emailService->sendConfirmationEmail($email, $name, $result['confirmation_token'])) {
+                $this->setSuccessMessage('Registration successful. Please check your email to confirm your account.');
+            } else {
+                $this->setSuccessMessage('Registration successful, but confirmation did not send.');
+            }
             $this->redirect(BASE_URL . 'login');
         } else {
             $this->setErrorMessage('Registration failed. Please try again.');
             $this->redirect(BASE_URL . 'register');
+        }
+    }
+    
+    public function confirmEmail() {
+        $token = $_GET['token'] ?? '';
+        
+        if (empty($token)) {
+            $this->setErrorMessage('Invalid confirmation link');
+            $this->redirect(BASE_URL);
+            return;
+        }
+        
+        // Get user by token
+        $user = $this->userModel->getUserByToken($token);
+        
+        if (!$user) {
+            $this->setErrorMessage('Invalid or expired confirmation link');
+            $this->redirect(BASE_URL);
+            return;
+        }
+        
+        // Confirm email
+        if ($this->userModel->confirmEmail($token)) {
+            $this->setSuccessMessage('Email confirmed successfully. You can now login.');
+            $this->redirect(BASE_URL . 'login');
+        } else {
+            $this->setErrorMessage('Error confirming email. Please try again or contact support.');
+            $this->redirect(BASE_URL);
+        }
+    }
+    
+    public function resendConfirmation() {
+        if ($this->isLoggedIn()) {
+            $this->redirectToDashboard();
+            return;
+        }
+        
+        $this->render('auth/resend_confirmation', [
+            'title' => 'Resend Confirmation - ' . SITE_NAME
+        ]);
+    }
+    
+    public function resendConfirmationPost() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect(BASE_URL . 'resend-confirmation');
+            return;
+        }
+        
+        $email = $_POST['email'] ?? '';
+        
+        if (empty($email)) {
+            $this->setErrorMessage('Please enter your email address');
+            $this->redirect(BASE_URL . 'resend-confirmation');
+            return;
+        }
+        
+        $user = $this->userModel->getByEmail($email);
+        
+        if (!$user) {
+            $this->setErrorMessage('Email not found');
+            $this->redirect(BASE_URL . 'resend-confirmation');
+            return;
+        }
+        
+        if ($user['is_confirmed'] == 1) {
+            $this->setErrorMessage('This email is already confirmed');
+            $this->redirect(BASE_URL . 'login');
+            return;
+        }
+        
+        // Regenerate token and send email
+        $token = $this->userModel->regenerateToken($email);
+        
+        if ($token && $this->emailService->sendConfirmationEmail($email, $user['name'], $token)) {
+            $this->setSuccessMessage('Confirmation email sent. Please check your inbox.');
+            $this->redirect(BASE_URL . 'login');
+        } else {
+            $this->setErrorMessage('Error sending confirmation email. Please try again later.');
+            $this->redirect(BASE_URL . 'resend-confirmation');
         }
     }
     

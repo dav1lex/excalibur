@@ -26,8 +26,8 @@
 - [x] Improved UI for lot management with auction filtering
 
 ## Phase 4: Bidding System
-- [x] Bid placement functionality //seems ok for now
-- [x] Proxy bidding system //kinda works, needs more logic
+- [x] Bid placement functionality 
+- [x] Proxy bidding system 
 - [x] Watchlist functionality 
 - [x] Countdown timers
 - [x] Bid history display
@@ -37,7 +37,8 @@
 - [x] User dashboard
 - [x] My bids history
 - [x] Won items tracking
-- [ ] Email notifications
+- [x] Email notifications for registration
+- [ SKIP THIS] Email notifications for bidding events 
 - [x] Role-specific dashboard access
 - [x] Watchlist management
 
@@ -66,3 +67,4 @@
 - [x] Resolved issue with lot counts on admin auction page
 - [x] Fixed auction status not changing due to routing and controller logic
 - [x] Corrected lot update functionality (image, price, etc.) and redirect behavior 
+- [x] Added email confirmation for user registration 

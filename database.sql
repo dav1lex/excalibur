@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
+    is_confirmed TINYINT(1) DEFAULT 0,
+    confirmation_token VARCHAR(100) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -79,6 +81,6 @@ CREATE TABLE IF NOT EXISTS watchlist (
 );
 
 -- Insert default admin user
-INSERT INTO users (name, email, password, role) VALUES 
-('Admin', 'admin@example.com', '$2y$10$JmZnVSH5jJ2WO7x9sK09Quk/tM5LOnGqQbP9EFcME7.ZM6gECYzMa', 'admin');
+INSERT INTO users (name, email, password, role, is_confirmed) VALUES 
+('Admin', 'admin@example.com', '$2y$10$JmZnVSH5jJ2WO7x9sK09Quk/tM5LOnGqQbP9EFcME7.ZM6gECYzMa', 'admin', 1);
 -- Password: admin123 

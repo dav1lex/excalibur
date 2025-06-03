@@ -1,0 +1,30 @@
+# Composer vendor directory
+/vendor/
+
+# Composer lock file
+composer.lock
+
+# PHPMailer specific files that might contain sensitive information
+EmailService.php.bak
+
+# Ignore environment-specific files
+.env
+.env.local
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace 
+
+# Ignore all files in the public/uploads directory
+public/uploads/*
+
+# Ignore all files in the public/uploads directory
+public/uploads/*
+
+.cursor/

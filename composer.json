@@ -1,0 +1,8 @@
+{
+    "name": "auction/platform",
+    "description": "Auction Platform",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^6.8"
+    }
+}
