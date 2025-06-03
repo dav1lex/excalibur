@@ -101,7 +101,7 @@
                     <a href="<?= BASE_URL ?>lots/create?auction_id=<?= $auction['id'] ?>" class="btn btn-success">
                         <i class="bi bi-plus-circle"></i> Add New Lot
                     </a>
-                    <a href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>" class="btn btn-info">
+                    <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>" class="btn btn-info">
                         <i class="bi bi-eye"></i> View Auction Page
                     </a>
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>">
@@ -125,7 +125,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
+                <a href="<?= BASE_URL ?>auctions/delete/<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
             </div>
         </div>
     </div>
@@ -176,7 +176,7 @@
                                 <td><?= $lot['reserve_price'] ? '$' . number_format($lot['reserve_price']) : 'None' ?></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="<?= BASE_URL ?>lots/view?id=<?= $lot['id'] ?>" class="btn btn-info" title="View">
+                                        <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $lot['id'] ?>" class="btn btn-info" title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <a href="<?= BASE_URL ?>lots/edit?id=<?= $lot['id'] ?>" class="btn btn-primary" title="Edit">

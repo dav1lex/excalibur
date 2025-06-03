@@ -66,13 +66,13 @@ $router->get('/user/watchlist', [BidController::class, 'watchlist']);
 
 // Auction 
 $router->get('/auctions', [AuctionController::class, 'index']);
-$router->get('/auctions/view', [AuctionController::class, 'view']);
 $router->get('/auctions/create', [AuctionController::class, 'create']);
 $router->post('/auctions/store', [AuctionController::class, 'store']);
-$router->get('/auctions/edit', [AuctionController::class, 'edit']);
 $router->get('/auctions/edit/:id', [AuctionController::class, 'edit']);
 $router->post('/auctions/update/:id', [AuctionController::class, 'update']);
-$router->get('/auctions/delete', [AuctionController::class, 'delete']);
+$router->get('/auctions/delete/:id', [AuctionController::class, 'delete']);
+$router->get('/auctions/:auction_id/lots/:lot_id', [AuctionController::class, 'view']);
+$router->get('/auctions/:id', [AuctionController::class, 'view']);
 
 // Lot 
 $router->get('/lots/view', [LotController::class, 'view']);

@@ -5,7 +5,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="<?= BASE_URL ?>auctions">Auctions</a></li>
-                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>"><?= htmlspecialchars($auction['title']) ?></a></li>
+                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>"><?= htmlspecialchars($auction['title']) ?></a></li>
                     <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($lot['title']) ?></li>
                 </ol>
             </nav>
@@ -39,27 +39,27 @@
             $badgeClass = 'bg-secondary';
             $badgeText = 'Draft';
             
-            if ($auction['auction_status'] === 'upcoming') {
+            if ($auction['status'] === 'upcoming') {
                 $badgeClass = 'bg-info';
                 $badgeText = 'Upcoming';
-            } elseif ($auction['auction_status'] === 'live') {
+            } elseif ($auction['status'] === 'live') {
                 $badgeClass = 'bg-success';
                 $badgeText = 'Live';
-            } elseif ($auction['auction_status'] === 'ended') {
+            } elseif ($auction['status'] === 'ended') {
                 $badgeClass = 'bg-dark';
                 $badgeText = 'Ended';
             }
             ?>
             <span class="badge <?= $badgeClass ?> fs-6 mb-2"><?= $badgeText ?></span>
             <div class="d-block">
-                <?php if ($auction['auction_status'] === 'upcoming'): ?>
+                <?php if ($auction['status'] === 'upcoming'): ?>
                     <div class="text-muted">
-                        <i class="bi bi-calendar-event me-1"></i> Starts: <?= date('M j, Y, g:i A', strtotime($auction['auction_start_date'])) ?>
+                        <i class="bi bi-calendar-event me-1"></i> Starts: <?= date('M j, Y, g:i A', strtotime($auction['start_date'])) ?>
                     </div>
-                <?php elseif ($auction['auction_status'] === 'live'): ?>
+                <?php elseif ($auction['status'] === 'live'): ?>
                     <div class="text-danger fw-bold">
-                        <i class="bi bi-alarm me-1"></i> Ends: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
-                        <div class="auction-timer border rounded bg-light p-2 mt-1 text-center" data-end="<?= $auction['auction_end_date'] ?>">
+                        <i class="bi bi-alarm me-1"></i> Ends: <?= date('M j, Y, g:i A', strtotime($auction['end_date'])) ?>
+                        <div class="auction-timer border rounded bg-light p-2 mt-1 text-center" data-end="<?= $auction['end_date'] ?>">
                             <span class="days">00</span>d
                             <span class="hours">00</span>h
                             <span class="minutes">00</span>m
@@ -68,7 +68,7 @@
                     </div>
                 <?php else: ?>
                     <div class="text-muted">
-                        <i class="bi bi-calendar-check me-1"></i> Ended: <?= date('M j, Y, g:i A', strtotime($auction['auction_end_date'])) ?>
+                        <i class="bi bi-calendar-check me-1"></i> Ended: <?= date('M j, Y, g:i A', strtotime($auction['end_date'])) ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -146,7 +146,7 @@
                         </a>
                     <?php endif; ?>
 
-                    <?php if ($auction['auction_status'] === 'live'): ?>
+                    <?php if ($auction['status'] === 'live'): ?>
                         <hr>
                         <?php if (isset($user)): ?>
                             <?php 
@@ -178,7 +178,7 @@
                                 Please <a href="<?= BASE_URL ?>login" class="alert-link">login</a> to place a bid.
                             </div>
                         <?php endif; ?>
-                    <?php elseif ($auction['auction_status'] === 'upcoming'): ?>
+                    <?php elseif ($auction['status'] === 'upcoming'): ?>
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle me-2"></i> Bidding will open when the auction starts.
                         </div>
@@ -254,7 +254,7 @@
                                 <p class="card-text small mb-1">
                                     <strong>Current:</strong> $<?= number_format($relatedLot['current_price']) ?>
                                 </p>
-                                <a href="<?= BASE_URL ?>lots/view?id=<?= $relatedLot['id'] ?>" class="btn btn-sm btn-outline-primary w-100">View Details</a>
+                                <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $relatedLot['id'] ?>" class="btn btn-sm btn-outline-primary w-100">View Details</a>
                             </div>
                         </div>
                     </div>

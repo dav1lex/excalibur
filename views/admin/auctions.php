@@ -103,7 +103,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>" class="btn btn-info" title="View">
+                                                <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>" class="btn btn-info" title="View">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                                 <a href="<?= BASE_URL ?>auctions/edit/<?= $auction['id'] ?>" class="btn btn-primary" title="Edit">
@@ -132,7 +132,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <a href="<?= BASE_URL ?>auctions/delete?id=<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
+                                                    <a href="<?= BASE_URL ?>auctions/delete/<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
                                                 </div>
                                             </div>
                                         </div>

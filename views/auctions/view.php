@@ -142,7 +142,7 @@
                     <?php foreach ($lots as $lot): ?>
                         <div class="col mb-4">
                             <div class="card h-100">
-                                <!-- images should have 2500x1250 def -->
+                                <!-- images 2500x1250 def -->
                                 <div
                                     style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
                                     <?php if (!empty($lot['image_path'])): ?>
@@ -172,7 +172,7 @@
                                         <span
                                             class="text-success fw-bold fs-5">$<?= number_format($lot['current_price']) ?></span>
                                     </p>
-                                    <a href="<?= BASE_URL ?>lots/view?id=<?= $lot['id'] ?>" class="btn btn-primary w-100">
+                                    <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $lot['id'] ?>" class="btn btn-primary w-100">
                                         <i class="bi bi-eye"></i> View Lot
                                     </a>
                                 </div>

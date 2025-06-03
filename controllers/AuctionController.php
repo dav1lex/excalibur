@@ -53,24 +53,43 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Show individual auction
+     * Displays an auction page or a specific lot page within an auction.
+     * This method acts as a dispatcher based on the provided URL parameters.
+     *
+     * Route: GET /auctions/{auction_id}
+     * Route: GET /auctions/{auction_id}/lots/{lot_id}
+     *
+     * @param string|int $auction_id_from_url The ID of the auction from the URL.
+     * @param string|int|null $lot_id_from_url (Optional) The ID of the lot from the URL.
      */
-    public function view($id = null)
+    public function view($auction_id_from_url, $lot_id_from_url = null)
     {
-        if (!$id) {
-            $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-        }
-
-        $auction = $this->auctionModel->getById($id);
+        $auction_id = (int) $auction_id_from_url;
+        $auction = $this->auctionModel->getById($auction_id);
 
         if (!$auction) {
-            $this->setErrorMessage('Auction not found');
+            $this->setErrorMessage('Auction not found.');
             $this->redirect(BASE_URL . 'auctions');
             return;
         }
 
-        // Get lots for this auction
-        $lots = $this->lotModel->getByAuctionId($id);
+        if ($lot_id_from_url !== null) {
+            // URL indicates a specific lot view: /auctions/{auction_id}/lots/{lot_id}
+            $this->_displayLotPage($auction, (int) $lot_id_from_url);
+        } else {
+            // URL indicates an auction view: /auctions/{auction_id}
+            $this->_displayAuctionPage($auction);
+        }
+    }
+
+    /**
+     * Prepares data and renders the auction detail page.
+     *
+     * @param array $auction The auction data.
+     */
+    private function _displayAuctionPage(array $auction)
+    {
+        $lots = $this->lotModel->getByAuctionId($auction['id']);
 
         $this->render('auctions/view', [
             'title' => $auction['title'] . ' - ' . SITE_NAME,
@@ -78,6 +97,56 @@ class AuctionController extends BaseController
             'lots' => $lots,
             'user' => $this->getCurrentUser()
         ]);
+    }
+
+    /**
+     * Prepares data and renders the lot detail page.
+     *
+     * @param array $auction The parent auction data.
+     * @param int $lot_id The ID of the lot to display.
+     */
+    private function _displayLotPage(array $auction, int $lot_id)
+    {
+        $current_lot = $this->lotModel->getById($lot_id);
+
+        // Verify the lot exists and belongs to the specified auction
+        if (!$current_lot || $current_lot['auction_id'] != $auction['id']) {
+            $this->setErrorMessage('Lot not found in this auction.');
+            $this->redirect(BASE_URL . 'auctions/' . $auction['id']);
+            return;
+        }
+
+        $user = $this->getCurrentUser();
+        $bidModel = new Bid();
+        $watchlistModel = new Watchlist();
+
+        $bids = $bidModel->getByLotId($lot_id);
+
+        $inWatchlist = false;
+        if ($user) {
+            $inWatchlist = $watchlistModel->isInWatchlist($user['id'], $lot_id);
+        }
+
+        // Fetch other lots in the same auction, excluding the current one
+        $allLotsInAuction = $this->lotModel->getByAuctionId($auction['id']);
+        $relatedLots = array_filter($allLotsInAuction, function ($related_lot_item) use ($lot_id) {
+            return $related_lot_item['id'] != $lot_id;
+        });
+
+        $data = [
+            'title' => $current_lot['title'] . ' - ' . $auction['title'] . ' - ' . SITE_NAME,
+            'lot' => $current_lot,
+            'auction' => $auction, // Pass the parent auction data for context
+            'bids' => $bids,
+            'user' => $user,
+            'inWatchlist' => $inWatchlist,
+            'relatedLots' => $relatedLots
+        ];
+
+        // The 'lots/view.php' template is used to display the lot details.
+        // It expects $auction data for auction status, dates, etc. (which is already included)
+        // and $lot data for the specific lot details.
+        $this->render('lots/view', $data);
     }
 
     /**
@@ -107,7 +176,7 @@ class AuctionController extends BaseController
     public function create()
     {
         // Check if user is admin
-       $this->isAdmin();
+        $this->isAdmin();
 
         $this->render('admin/create_auction', [
             'title' => 'Create Auction - ' . SITE_NAME,
@@ -259,7 +328,7 @@ class AuctionController extends BaseController
             if (!empty($image_path) && file_exists($image_path)) {
                 @unlink($image_path);
             }
-            
+
             $image_path = $this->handleImageUpload($_FILES['auction_image'], 'auctions');
             if (!$image_path) {
                 $this->setErrorMessage('Error uploading image. Please try again.');
@@ -293,32 +362,32 @@ class AuctionController extends BaseController
     private function handleImageUpload($file, $folder)
     {
         $upload_dir = 'uploads/' . $folder . '/';
-        
+
         // Create directory if it doesn't exist
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
-        
+
         // Check file size (6MB max)
         if ($file['size'] > 6 * 1024 * 1024) {
             return false;
         }
-        
+
         // Check file type
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!in_array($file['type'], $allowed_types)) {
             return false;
         }
-        
+
         // Generate unique filename
         $filename = uniqid() . '_' . basename($file['name']);
         $filepath = $upload_dir . $filename;
-        
+
         // Move uploaded file
         if (move_uploaded_file($file['tmp_name'], $filepath)) {
             return $filepath;
         }
-        
+
         return false;
     }
 

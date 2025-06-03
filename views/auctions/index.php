@@ -93,7 +93,7 @@
                             </div>
                         </div>
                         <div class="card-footer bg-white border-top-0">
-                            <a href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>" class="btn btn-primary w-100">
+                            <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>" class="btn btn-primary w-100">
                                 <i class="bi bi-eye"></i> View Auction
                             </a>
                         </div>
