@@ -123,7 +123,7 @@
                                         <td style="font-weight: bold;"><?= number_format($lot['current_price']) ?>€</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="<?= BASE_URL ?>lots/view?id=<?= $lot['id'] ?>" class="btn btn-info" title="View">
+                                                <a href="<?= BASE_URL ?>admin/view-lot?id=<?= $lot['id'] ?>" class="btn btn-info" title="View">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                                 <a href="<?= BASE_URL ?>lots/edit?id=<?= $lot['id'] ?>" class="btn btn-primary" title="Edit">

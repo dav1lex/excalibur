@@ -62,18 +62,28 @@ class BidController extends BaseController
             return;
         }
 
+        // Calculate minimum bid amount
+        $minimumBid = $this->bidModel->getNextMinimumBid($lot['current_price']);
+        
         // Validate bid amount
-        if ($bid_amount <= $lot['current_price']) {
-            $this->setErrorMessage('Your bid must be higher than the current bid.');
+        if ($bid_amount < $minimumBid) {
+            $this->setErrorMessage('Your bid must be at least ' . $minimumBid . '€. The bid increment for this price range is ' . $this->bidModel->getBidIncrement($lot['current_price']) . '€.');
             $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
             return;
         }
 
         // Validate max amount if provided
-        if ($max_amount !== null && $max_amount < $bid_amount) {
-            $this->setErrorMessage('Maximum bid amount must be greater than or equal to your bid amount.');
-            $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
-            return;
+        if ($max_amount !== null) {
+            if ($max_amount < $bid_amount) {
+                $this->setErrorMessage('Maximum bid amount must be greater than or equal to your bid amount.');
+                $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
+                return;
+            }
+            
+            // Log for debugging
+            error_log("User {$_SESSION['user_id']} placed a bid with amount: $bid_amount and max_amount: $max_amount on lot: $lot_id");
+        } else {
+            error_log("User {$_SESSION['user_id']} placed a regular bid with amount: $bid_amount on lot: $lot_id");
         }
 
         // Place the bid
@@ -88,9 +98,17 @@ class BidController extends BaseController
 
         if ($bidId) {
             // Process proxy bidding
-            $this->bidModel->processProxyBidding($lot_id);
-
-            $this->setSuccessMessage('Your bid has been placed successfully.');
+            $proxyResult = $this->bidModel->processProxyBidding($lot_id, 0);
+            
+            if ($proxyResult) {
+                if ($max_amount !== null) {
+                    $this->setSuccessMessage('Your bid has been placed successfully with a maximum amount of ' . $max_amount . '€. The system will automatically bid on your behalf up to this amount.');
+                } else {
+                    $this->setSuccessMessage('Your bid has been placed successfully.');
+                }
+            } else {
+                $this->setSuccessMessage('Your bid was placed, but there was an issue with proxy bidding. Please check the current status.');
+            }
         } else {
             $this->setErrorMessage('There was an error placing your bid. Please try again.');
         }

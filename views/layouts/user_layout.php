@@ -7,8 +7,8 @@ include_once 'views/layouts/header.php';
     <div class="row">
         <!-- Sidebar toggle button for mobile -->
         <div class="d-md-none">
-            <button class="btn btn-primary position-fixed mt-2 ms-2" id="sidebarToggle" style="z-index: 1001;">
-                <i class="bi bi-list"></i> Menu
+            <button class="btn btn-dark position-fixed mt-3 ms-3 rounded-circle" id="sidebarToggle" style="z-index: 1001; width: 45px; height: 45px;">
+                <i class="bi bi-list"></i>
             </button>
         </div>
         
@@ -22,53 +22,72 @@ include_once 'views/layouts/header.php';
                     </button>
                 </div>
                 
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>My Account</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'user/dashboard') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/dashboard">
-                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'user/profile') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/profile">
-                            <i class="bi bi-person me-2"></i> My Profile
-                        </a>
-                    </li>
-                </ul>
+                <div class="text-center mb-4 d-none d-md-block">
+                    <div class="bg-dark text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person fs-3"></i>
+                    </div>
+                    <h6 class="mb-0">My Account</h6>
+                </div>
                 
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>My Activity</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'user/bids') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/bids">
-                            <i class="bi bi-cash-stack me-2"></i> My Bids
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'user/watchlist') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/watchlist">
-                            <i class="bi bi-bookmark-heart me-2"></i> My Watchlist
-                        </a>
-                    </li>
-                </ul>
+                <div class="px-3 mb-4">
+                    <div class="sidebar-divider mb-3 d-flex align-items-center">
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                        <span class="mx-2 text-uppercase text-muted small fw-bold">Account</span>
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded <?= strpos($_SERVER['REQUEST_URI'], 'user/dashboard') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/dashboard">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded <?= strpos($_SERVER['REQUEST_URI'], 'user/profile') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/profile">
+                                <i class="bi bi-person me-2"></i> My Profile
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>Auctions</span>
-                </h6>
-                <ul class="nav flex-column mb-2">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>auctions">
-                            <i class="bi bi-calendar-event me-2"></i> Browse Auctions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>logout">
-                            <i class="bi bi-box-arrow-right me-2"></i> Logout
-                        </a>
-                    </li>
-                </ul>
+                <div class="px-3 mb-4">
+                    <div class="sidebar-divider mb-3 d-flex align-items-center">
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                        <span class="mx-2 text-uppercase text-muted small fw-bold">My Activity</span>
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded <?= strpos($_SERVER['REQUEST_URI'], 'user/bids') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/bids">
+                                <i class="bi bi-cash-stack me-2"></i> My Bids
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded <?= strpos($_SERVER['REQUEST_URI'], 'user/watchlist') !== false ? 'active' : '' ?>" href="<?= BASE_URL ?>user/watchlist">
+                                <i class="bi bi-bookmark-heart me-2"></i> My Watchlist
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="px-3">
+                    <div class="sidebar-divider mb-3 d-flex align-items-center">
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                        <span class="mx-2 text-uppercase text-muted small fw-bold">Auctions</span>
+                        <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
+                    </div>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded" href="<?= BASE_URL ?>auctions">
+                                <i class="bi bi-calendar-event me-2"></i> Browse Auctions
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a class="nav-link rounded text-danger" href="<?= BASE_URL ?>logout">
+                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         
@@ -88,23 +107,43 @@ include_once 'views/layouts/header.php';
     }
     
     .sidebar .nav-link {
-        color: #333;
+        color: #495057;
         font-weight: 500;
-        padding: .5rem 1rem;
+        padding: .75rem 1rem;
+        transition: all 0.2s ease;
     }
     
     .sidebar .nav-link.active {
-        color: #007bff;
-        background-color: rgba(0, 123, 255, .1);
+        color: #fff;
+        background-color: #212529;
     }
     
     .sidebar .nav-link:hover {
-        color: #007bff;
+        color: #212529;
+        background-color: rgba(33, 37, 41, .1);
     }
     
     .sidebar-heading {
         font-size: .75rem;
         text-transform: uppercase;
+    }
+    
+    @media (max-width: 767.98px) {
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            width: 280px;
+            padding: 0;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
     }
 </style>
 

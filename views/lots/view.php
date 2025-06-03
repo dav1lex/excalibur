@@ -119,17 +119,26 @@
                     <?php if ($auction['auction_status'] === 'live'): ?>
                         <hr>
                         <?php if (isset($user)): ?>
+                            <?php 
+                            // Calculate minimum bid based on the current price
+                            $bidModel = new Bid();
+                            $minimumBid = $bidModel->getNextMinimumBid($lot['current_price']);
+                            $increment = $bidModel->getBidIncrement($lot['current_price']);
+                            ?>
                             <form action="<?= BASE_URL ?>bids/place" method="post" class="mt-3">
                                 <input type="hidden" name="lot_id" value="<?= $lot['id'] ?>">
                                 <div class="mb-3">
-                                    <label for="bid_amount" class="form-label">Your Bid Amount ($)</label>
-                                    <input type="number" class="form-control" id="bid_amount" name="bid_amount" min="<?= $lot['current_price'] + 1 ?>" value="<?= $lot['current_price'] + 1 ?>" required>
-                                    <div class="form-text">Minimum bid: $<?= number_format($lot['current_price'] + 1) ?></div>
+                                    <label for="bid_amount" class="form-label">Your Bid Amount (€)</label>
+                                    <input type="number" class="form-control" id="bid_amount" name="bid_amount" min="<?= $minimumBid ?>" value="<?= $minimumBid ?>" required>
+                                    <div class="form-text">Minimum bid: <?= number_format($minimumBid) ?>€ (Increment: <?= $increment ?>€)</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="max_amount" class="form-label">Maximum Bid Amount (Optional)</label>
-                                    <input type="number" class="form-control" id="max_amount" name="max_amount" min="<?= $lot['current_price'] + 1 ?>">
-                                    <div class="form-text">Set a maximum amount for proxy bidding</div>
+                                    <input type="number" class="form-control" id="max_amount" name="max_amount" min="<?= $minimumBid ?>">
+                                    <div class="form-text">Set a maximum amount for proxy bidding. The system will automatically bid on your behalf up to this amount.</div>
+                                </div>
+                                <div class="alert alert-info mb-3">
+                                    <strong><i class="bi bi-info-circle"></i> Proxy Bidding:</strong> If you set a maximum bid, the system will only bid as much as needed to outbid others (using the appropriate increments), up to your maximum. Your maximum amount stays confidential.
                                 </div>
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">Place Bid</button>

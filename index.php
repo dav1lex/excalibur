@@ -1,16 +1,14 @@
 <?php
-error_log('INDEX.PHP ROUTER REACHED - TOP'); // Basic check to see if error logging works
-// Start session
 session_start();
 
-// Load config file
+//  config file
 require_once 'config/config.php';
 
-// Load Database and Router classes
+//  Database and Router 
 require_once 'config/Database.php';
 require_once 'config/Router.php';
 
-// Load Controllers
+//  Controllers
 require_once 'controllers/BaseController.php';
 require_once 'controllers/HomeController.php';
 require_once 'controllers/AuthController.php';
@@ -20,43 +18,50 @@ require_once 'controllers/AuctionController.php';
 require_once 'controllers/LotController.php';
 require_once 'controllers/BidController.php';
 
-// Load Models
+//  Models
 require_once 'models/Auction.php';
+require_once 'models/User.php';
+require_once 'models/Lot.php';
+require_once 'models/Bid.php';
+require_once 'models/Watchlist.php'; 
 
-// Create Router instance
+//  Router instance
 $router = new Router();
 
-// Define routes
-// Home routes
+// routes
+
+// Home 
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/index.php', [HomeController::class, 'index']);
+$router->get('/how-to-bid', [HomeController::class, 'howToBid']);
 
-// Auth routes
+// Auth 
 $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'loginPost']);
 $router->get('/register', [AuthController::class, 'register']);
 $router->post('/register', [AuthController::class, 'registerPost']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
-// Admin routes
+// Admin 
 $router->get('/admin/dashboard', [AdminController::class, 'dashboard']);
 $router->get('/admin/users', [AdminController::class, 'users']);
 $router->get('/admin/edit-user', [AdminController::class, 'editUser']);
 $router->post('/admin/update-user', [AdminController::class, 'updateUser']);
 $router->get('/admin/delete-user', [AdminController::class, 'deleteUser']);
 $router->get('/admin/lots', [AdminController::class, 'lots']);
+$router->get('/admin/view-lot', [AdminController::class, 'viewLot']);
 $router->get('/admin/auctions', [AdminController::class, 'auctions']);
 $router->get('/admin/bids', [AdminController::class, 'bids']);
 $router->get('/admin/delete-bid', [AdminController::class, 'deleteBid']);
 
-// User routes
+// User 
 $router->get('/user/dashboard', [UserController::class, 'dashboard']);
 $router->get('/user/profile', [UserController::class, 'profile']);
 $router->post('/user/update-profile', [UserController::class, 'updateProfile']);
 $router->get('/user/bids', [BidController::class, 'myBids']);
 $router->get('/user/watchlist', [BidController::class, 'watchlist']);
 
-// Auction routes
+// Auction 
 $router->get('/auctions', [AuctionController::class, 'index']);
 $router->get('/auctions/view', [AuctionController::class, 'view']);
 $router->get('/auctions/create', [AuctionController::class, 'create']);
@@ -66,7 +71,7 @@ $router->get('/auctions/edit/:id', [AuctionController::class, 'edit']);
 $router->post('/auctions/update/:id', [AuctionController::class, 'update']);
 $router->get('/auctions/delete', [AuctionController::class, 'delete']);
 
-// Lot routes
+// Lot 
 $router->get('/lots/view', [LotController::class, 'view']);
 $router->get('/lots/create', [LotController::class, 'create']);
 $router->post('/lots/store', [LotController::class, 'store']);
@@ -75,7 +80,7 @@ $router->get('/lots/edit/:id', [LotController::class, 'edit']);
 $router->post('/lots/update/:id', [LotController::class, 'update']);
 $router->get('/lots/delete', [LotController::class, 'delete']);
 
-// Bid routes
+// Bid & wlist 
 $router->post('/bids/place', [BidController::class, 'place']);
 $router->post('/watchlist/add/:id', [BidController::class, 'addToWatchlist']);
 $router->post('/watchlist/remove/:id', [BidController::class, 'removeFromWatchlist']);

@@ -108,13 +108,14 @@ class Bid extends BaseModel {
     
     /**
      * Place a new bid
+     * Records the user's bid and updates the lot's current price.
      */
     public function placeBid($data) {
         try {
-            // Start transaction
+            // Start a database transaction to ensure all operations succeed or fail together.
             $this->conn->beginTransaction();
             
-            // Insert bid record
+            // SQL to insert the new bid into the 'bids' table.
             $sql = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
                     VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
             
@@ -123,7 +124,8 @@ class Bid extends BaseModel {
             $stmt->bindParam(':lot_id', $data['lot_id'], PDO::PARAM_INT);
             $stmt->bindParam(':amount', $data['amount'], PDO::PARAM_INT);
             
-            // Handle max_amount (for proxy bidding)
+            // If a max_amount is provided (for proxy bidding) and it's valid, bind it.
+            // Otherwise, store NULL for max_amount.
             if (isset($data['max_amount']) && $data['max_amount'] > $data['amount']) {
                 $stmt->bindParam(':max_amount', $data['max_amount'], PDO::PARAM_INT);
             } else {
@@ -131,49 +133,70 @@ class Bid extends BaseModel {
             }
             
             $stmt->execute();
-            $bidId = $this->conn->lastInsertId();
+            $bidId = $this->conn->lastInsertId(); // Get the ID of the newly inserted bid.
             
-            // Update lot's current price
+            // SQL to update the lot's current_price with the amount of this new bid.
             $sqlUpdate = "UPDATE lots SET current_price = :amount, updated_at = NOW() WHERE id = :lot_id";
             $stmtUpdate = $this->conn->prepare($sqlUpdate);
             $stmtUpdate->bindParam(':amount', $data['amount'], PDO::PARAM_INT);
             $stmtUpdate->bindParam(':lot_id', $data['lot_id'], PDO::PARAM_INT);
             $stmtUpdate->execute();
             
-            // Commit transaction
+            // If all database operations were successful, commit the transaction.
             $this->conn->commit();
             
-            return $bidId;
+            return $bidId; // Return the new bid's ID on success.
         } catch (Exception $e) {
-            // Rollback transaction on error
+            // If any error occurred, roll back the transaction to undo changes.
             $this->conn->rollBack();
-            error_log($e->getMessage());
-            return false;
+            // Log the detailed error for server administrators.
+            error_log("Error in placeBid: " . $e->getMessage()); 
+            return false; // Indicate failure.
         }
     }
     
     /**
-     * Process proxy bidding
-     * This is called after a new bid is placed to handle automatic proxy bidding
+     * Process proxy bidding.
+     * This method is called after a new bid is placed to handle automatic proxy bidding.
+     * It checks if the new bid triggers any existing proxy bids and places them automatically.
+     * 
+     * @param int $lot_id_param The ID of the lot for which to process proxy bids.
+     * @param int $recursionDepth Current recursion depth to prevent infinite loops.
+     * @return bool True if processing was successful or not needed, false on error.
      */
-    public function processProxyBidding($lot_id) {
+    public function processProxyBidding($lot_id_param, $recursionDepth = 0) {
+        // Ensure lot_id is an integer for database operations.
+        $lot_id = intval($lot_id_param);
+
+        // Safety check: Prevent infinite recursion if proxy bids trigger too many counter-bids.
+        if ($recursionDepth > 5) {
+            // Log this specific situation as it indicates a potential issue or complex scenario.
+            error_log("Proxy bidding recursion depth limit reached for lot_id: $lot_id");
+            return true; // Stop processing to prevent server overload.
+        }
+        
         try {
-            // Start transaction
+            // Start a database transaction for atomicity of operations.
             $this->conn->beginTransaction();
             
-            // Get the current highest bid
+            // Step 1: Get the current highest bid for the lot.
             $sqlHighest = "SELECT * FROM bids WHERE lot_id = :lot_id ORDER BY amount DESC LIMIT 1";
             $stmtHighest = $this->conn->prepare($sqlHighest);
             $stmtHighest->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
             $stmtHighest->execute();
             $highestBid = $stmtHighest->fetch(PDO::FETCH_ASSOC);
             
+            // If there are no bids on the lot yet, there's no proxy bidding to process.
             if (!$highestBid) {
-                $this->conn->commit();
-                return true; // No bids yet
+                $this->conn->commit(); // Commit (though no changes were made in this path).
+                return true;
             }
             
-            // Get all proxy bids for this lot (excluding the highest bidder)
+            // Step 2: Find all active proxy bids from other users that could potentially outbid the current highest bid.
+            // - Must have a max_amount set.
+            // - Their max_amount must be greater than the current highest bid's actual amount.
+            // - Must not be from the user who currently holds the highest bid.
+            // - Order by the highest max_amount first, then by the earliest placed bid.
             $sqlProxy = "SELECT * FROM bids 
                         WHERE lot_id = :lot_id 
                         AND max_amount IS NOT NULL 
@@ -186,83 +209,132 @@ class Bid extends BaseModel {
             $stmtProxy->bindParam(':current_amount', $highestBid['amount'], PDO::PARAM_INT);
             $stmtProxy->bindParam(':highest_user_id', $highestBid['user_id'], PDO::PARAM_INT);
             $stmtProxy->execute();
-            
             $proxyBids = $stmtProxy->fetchAll(PDO::FETCH_ASSOC);
             
+            // If no competing proxy bids are found, no further action is needed in this cycle.
             if (empty($proxyBids)) {
                 $this->conn->commit();
-                return true; // No proxy bids to process
+                return true;
             }
             
-            // Get the highest proxy bid
+            // The strongest competing proxy bid (highest max_amount, earliest placed).
             $topProxyBid = $proxyBids[0];
             
-            // Calculate the new bid amount
-            // If the highest bidder has a max_amount, we need to check if it's higher than the proxy bid
+            // Flag to track if an automatic bid was placed in this cycle.
+            $newBidPlaced = false;
+            
+            // Step 3: Determine if and how an automatic bid should be placed.
+            // Scenario A: The current highest bidder ALSO has a max_amount set (they might be a proxy bidder themselves).
             if ($highestBid['max_amount'] !== null) {
-                // If highest bidder's max is higher than proxy bidder's max
+                // Scenario A1: The current highest bidder's max_amount is strong enough to beat or match the competing proxy bid.
                 if ($highestBid['max_amount'] >= $topProxyBid['max_amount']) {
-                    // Set current price to proxy bidder's max
-                    $newAmount = $topProxyBid['max_amount'];
+                    // Calculate the bid for the current highest bidder: just enough to outbid the competitor's max, up to their own max.
+                    $newAmount = min($topProxyBid['max_amount'] + $this->getBidIncrement($topProxyBid['max_amount']), $highestBid['max_amount']);
                     
-                    // Insert automatic bid for highest bidder
-                    $sqlInsert = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
-                                VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
-                    $stmtInsert = $this->conn->prepare($sqlInsert);
-                    $stmtInsert->bindParam(':user_id', $highestBid['user_id'], PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':amount', $newAmount, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':max_amount', $highestBid['max_amount'], PDO::PARAM_INT);
-                    $stmtInsert->execute();
+                    // Only place this new bid if it's actually higher than what they are currently bidding.
+                    if ($newAmount > $highestBid['amount']) {
+                        // Insert an automatic bid for the current highest bidder.
+                        $sqlInsert = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
+                                    VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
+                        $stmtInsert = $this->conn->prepare($sqlInsert);
+                        $userId = intval($highestBid['user_id']);
+                        $lotId = intval($lot_id); // Already int, but good practice.
+                        $bidAmount = intval($newAmount);
+                        $maxAmount = intval($highestBid['max_amount']);
+                        $stmtInsert->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':amount', $bidAmount, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':max_amount', $maxAmount, PDO::PARAM_INT);
+                        try {
+                            $stmtInsert->execute();
+                            $newBidPlaced = true;
+                        } catch (PDOException $e) {
+                            error_log("Error placing auto bid for highest bidder (Scenario A1): " . $e->getMessage() . " SQL: " . $sqlInsert);
+                            throw $e; // Re-throw to be caught by the outer catch block.
+                        }
+                    }
                 } else {
-                    // Proxy bidder's max is higher, so they outbid the highest bidder
-                    // Set current price to highest bidder's max + 1 (or increment by standard amount)
-                    $newAmount = $highestBid['max_amount'] + 1;
+                    // Scenario A2: The competing proxy bid ($topProxyBid) has a higher max_amount.
+                    // Calculate the bid for the competing proxy bidder: just enough to outbid the current highest bidder's max_amount.
+                    $newAmount = $this->getNextMinimumBid($highestBid['max_amount']);
                     
-                    // Insert automatic bid for proxy bidder
-                    $sqlInsert = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
-                                VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
-                    $stmtInsert = $this->conn->prepare($sqlInsert);
-                    $stmtInsert->bindParam(':user_id', $topProxyBid['user_id'], PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':amount', $newAmount, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':max_amount', $topProxyBid['max_amount'], PDO::PARAM_INT);
-                    $stmtInsert->execute();
+                    // Only place this new bid if it's actually higher than the current highest bid amount.
+                    // (This check might seem redundant if getNextMinimumBid always increases, but it's safe).
+                    if ($newAmount > $highestBid['amount']) {
+                        // Insert an automatic bid for the competing proxy bidder ($topProxyBid).
+                        $sqlInsert = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
+                                    VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
+                        $stmtInsert = $this->conn->prepare($sqlInsert);
+                        $userId = intval($topProxyBid['user_id']);
+                        $lotId = intval($lot_id);
+                        $bidAmount = intval($newAmount);
+                        $maxAmount = intval($topProxyBid['max_amount']);
+                        $stmtInsert->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':amount', $bidAmount, PDO::PARAM_INT);
+                        $stmtInsert->bindParam(':max_amount', $maxAmount, PDO::PARAM_INT);
+                        try {
+                            $stmtInsert->execute();
+                            $newBidPlaced = true;
+                        } catch (PDOException $e) {
+                            error_log("Error placing auto bid for competing proxy (Scenario A2): " . $e->getMessage() . " SQL: " . $sqlInsert);
+                            throw $e;
+                        }
+                    }
                 }
             } else {
-                // Highest bidder doesn't have a max, so proxy bidder outbids them
-                $newAmount = $highestBid['amount'] + 1;
+                // Scenario B: The current highest bidder placed a simple bid (no max_amount set).
+                // The competing proxy bidder ($topProxyBid) will attempt to outbid them.
+                $newAmount = $this->getNextMinimumBid($highestBid['amount']);
                 
-                // If proxy max is higher than current bid + 1
-                if ($topProxyBid['max_amount'] > $newAmount) {
-                    // Insert automatic bid for proxy bidder
+                // Check if the competing proxy bidder's max_amount is sufficient.
+                if ($topProxyBid['max_amount'] >= $newAmount) {
+                    // Insert an automatic bid for the competing proxy bidder ($topProxyBid).
                     $sqlInsert = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
                                 VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
                     $stmtInsert = $this->conn->prepare($sqlInsert);
-                    $stmtInsert->bindParam(':user_id', $topProxyBid['user_id'], PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':amount', $newAmount, PDO::PARAM_INT);
-                    $stmtInsert->bindParam(':max_amount', $topProxyBid['max_amount'], PDO::PARAM_INT);
-                    $stmtInsert->execute();
+                    $userId = intval($topProxyBid['user_id']);
+                    $lotId = intval($lot_id);
+                    $bidAmount = intval($newAmount);
+                    $maxAmount = intval($topProxyBid['max_amount']);
+                    $stmtInsert->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                    $stmtInsert->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
+                    $stmtInsert->bindParam(':amount', $bidAmount, PDO::PARAM_INT);
+                    $stmtInsert->bindParam(':max_amount', $maxAmount, PDO::PARAM_INT);
+                    try {
+                        $stmtInsert->execute();
+                        $newBidPlaced = true;
+                    } catch (PDOException $e) {
+                        error_log("Error placing auto bid for competing proxy (Scenario B): " . $e->getMessage() . " SQL: " . $sqlInsert);
+                        throw $e;
+                    }
                 }
             }
             
-            // Update lot's current price
-            $sqlUpdate = "UPDATE lots SET current_price = :amount, updated_at = NOW() WHERE id = :lot_id";
-            $stmtUpdate = $this->conn->prepare($sqlUpdate);
-            $stmtUpdate->bindParam(':amount', $newAmount, PDO::PARAM_INT);
-            $stmtUpdate->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
-            $stmtUpdate->execute();
-            
-            // Commit transaction
+            // Step 4: Update the lot's current_price to the new highest bid after any automatic actions.
+            $sqlUpdateLot = "UPDATE lots SET current_price = (SELECT MAX(amount) FROM bids WHERE lot_id = :sub_lot_id), updated_at = NOW() WHERE id = :main_lot_id";
+            $stmtUpdateLot = $this->conn->prepare($sqlUpdateLot);
+            $stmtUpdateLot->bindParam(':sub_lot_id', $lot_id, PDO::PARAM_INT);
+            $stmtUpdateLot->bindParam(':main_lot_id', $lot_id, PDO::PARAM_INT);
+            $stmtUpdateLot->execute();
+
+            // Step 5: Commit all changes made in this transaction.
             $this->conn->commit();
             
+            // Step 6: If an automatic bid was placed, re-run the process.
+            // This handles cases where multiple proxy bids might compete with each other in sequence.
+            if ($newBidPlaced) {
+                return $this->processProxyBidding($lot_id, $recursionDepth + 1);
+            }
+            
+            // If no new bid was placed, or processing is complete for this cycle.
             return true;
         } catch (Exception $e) {
-            // Rollback transaction on error
+            // If any error occurred during the process, roll back the transaction.
             $this->conn->rollBack();
-            error_log($e->getMessage());
-            return false;
+            // Log the error for server administrators.
+            error_log("Error in processProxyBidding: " . $e->getMessage());
+            return false; // Indicate failure.
         }
     }
     
@@ -392,5 +464,38 @@ class Bid extends BaseModel {
         }
         
         return $stmt->execute();
+    }
+    
+    /**
+     * Calculate bid increment based on current price
+     * 
+     * @param int $currentPrice The current price of the lot
+     * @return int The bid increment amount
+     */
+    public function getBidIncrement($currentPrice) {
+        if ($currentPrice < 30) {
+            return 2;
+        } elseif ($currentPrice < 100) {
+            return 5;
+        } elseif ($currentPrice < 200) {
+            return 10;
+        } elseif ($currentPrice < 500) {
+            return 20;
+        } elseif ($currentPrice < 1000) {
+            return 50;
+        } else {
+            return 100; // for over 1000, add 100
+        }
+    }
+    
+    /**
+     * Calculate next minimum bid based on current price
+     * 
+     * @param int $currentPrice The current price of the lot
+     * @return int The next minimum bid amount
+     */
+    public function getNextMinimumBid($currentPrice) {
+        $increment = $this->getBidIncrement($currentPrice);
+        return $currentPrice + $increment;
     }
 } 

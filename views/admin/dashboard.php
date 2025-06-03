@@ -1,63 +1,113 @@
 <div class="row mb-4">
     <div class="col-12">
-        <h1 class="display-5 mb-4 border-bottom pb-2">Admin Dashboard</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <h1 class="h2 mb-0"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h1>
+        </div>
         
         <?php if (isset($_SESSION['success_message'])): ?>
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php unset($_SESSION['success_message']); ?>
     <?php endif; ?>
     
     <?php if (isset($_SESSION['error_message'])): ?>
-        <div class="container mt-3">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($_SESSION['error_message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
     </div>
 </div>
 
-<div class="row g-4 mb-4">
+<div class="row g-4 mb-5">
     <div class="col-md-6 col-lg-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Users</h5>
-                <div class="display-4 my-3"><?= $stats['totalUsers'] ?></div>
-                <p class="card-text mt-auto"><a href="<?= BASE_URL ?>admin/users" class="text-white stretched-link">Manage Users</a></p>
+        <div class="card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body position-relative p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title text-muted mb-0">Total Users</h5>
+                    <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded p-2">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="display-5 fw-bold mb-2"><?= $stats['totalUsers'] ?></div>
+                <p class="text-muted mb-0">Registered accounts</p>
+                <a href="<?= BASE_URL ?>admin/users" class="stretched-link"></a>
+            </div>
+            <div class="card-footer bg-primary text-white p-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-plus me-2"></i>
+                    <span>Manage Users</span>
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Auctions</h5>
-                <div class="display-4 my-3"><?= $stats['totalAuctions'] ?></div>
-                <p class="card-text mt-auto"><a href="<?= BASE_URL ?>admin/auctions" class="text-white stretched-link">Manage Auctions</a></p>
+        <div class="card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body position-relative p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title text-muted mb-0">Total Auctions</h5>
+                    <div class="icon-shape bg-success bg-opacity-10 text-success rounded p-2">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                </div>
+                <div class="display-5 fw-bold mb-2"><?= $stats['totalAuctions'] ?></div>
+                <p class="text-muted mb-0">Active & completed</p>
+                <a href="<?= BASE_URL ?>admin/auctions" class="stretched-link"></a>
+            </div>
+            <div class="card-footer bg-success text-white p-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-calendar-plus me-2"></i>
+                    <span>Manage Auctions</span>
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Lots</h5>
-                <div class="display-4 my-3"><?= $stats['totalLots'] ?></div>
-                <p class="card-text mt-auto"><a href="<?= BASE_URL ?>admin/lots" class="text-white stretched-link">Manage Lots</a></p>
+        <div class="card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body position-relative p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title text-muted mb-0">Total Lots</h5>
+                    <div class="icon-shape bg-info bg-opacity-10 text-info rounded p-2">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                </div>
+                <div class="display-5 fw-bold mb-2"><?= $stats['totalLots'] ?></div>
+                <p class="text-muted mb-0">Listed items</p>
+                <a href="<?= BASE_URL ?>admin/lots" class="stretched-link"></a>
+            </div>
+            <div class="card-footer bg-info text-white p-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-bag-plus me-2"></i>
+                    <span>Manage Lots</span>
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="card bg-warning text-dark h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Bids</h5>
-                <div class="display-4 my-3"><?= $stats['totalBids'] ?></div>
-                <p class="card-text mt-auto"><a href="<?= BASE_URL ?>admin/bids" class="text-dark stretched-link">Manage Bids</a></p>
+        <div class="card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body position-relative p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title text-muted mb-0">Total Bids</h5>
+                    <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded p-2">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+                <div class="display-5 fw-bold mb-2"><?= $stats['totalBids'] ?></div>
+                <p class="text-muted mb-0">Placed bids</p>
+                <a href="<?= BASE_URL ?>admin/bids" class="stretched-link"></a>
+            </div>
+            <div class="card-footer bg-warning text-dark p-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-graph-up me-2"></i>
+                    <span>Manage Bids</span>
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -65,32 +115,104 @@
 
 <div class="row">
     <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Quick Actions</h5>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom-0 py-3">
+                <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Quick Actions</h5>
             </div>
             <div class="card-body">
-                <div class="list-group">
-                    <a href="<?= BASE_URL ?>admin/users" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Manage Users
-                        <span class="badge bg-primary rounded-pill"><?= $stats['totalUsers'] ?></span>
-                    </a>
-                    <a href="<?= BASE_URL ?>admin/auctions" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Manage Auctions
-                        <span class="badge bg-success rounded-pill"><?= $stats['totalAuctions'] ?></span>
-                    </a>
-                    <a href="<?= BASE_URL ?>admin/lots" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Manage Lots
-                        <span class="badge bg-info rounded-pill"><?= $stats['totalLots'] ?></span>
-                    </a>
-                    <a href="<?= BASE_URL ?>auctions/create" class="list-group-item list-group-item-action">
-                        Create New Auction
-                    </a>
-                    <a href="<?= BASE_URL ?>lots/create" class="list-group-item list-group-item-action">
-                        Add New Lot
-                    </a>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="<?= BASE_URL ?>admin/users" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                            <div class="py-3">
+                                <div class="icon-circle bg-primary text-white mx-auto mb-3">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <h5>Manage Users</h5>
+                                <p class="text-muted mb-0">View, edit, and manage user accounts</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="<?= BASE_URL ?>admin/auctions" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                            <div class="py-3">
+                                <div class="icon-circle bg-success text-white mx-auto mb-3">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <h5>Manage Auctions</h5>
+                                <p class="text-muted mb-0">View and manage all auction events</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="<?= BASE_URL ?>admin/lots" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                            <div class="py-3">
+                                <div class="icon-circle bg-info text-white mx-auto mb-3">
+                                    <i class="bi bi-collection"></i>
+                                </div>
+                                <h5>Manage Lots</h5>
+                                <p class="text-muted mb-0">View and manage all auction items</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="<?= BASE_URL ?>auctions/create" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                            <div class="py-3">
+                                <div class="icon-circle bg-dark text-white mx-auto mb-3">
+                                    <i class="bi bi-plus-lg"></i>
+                                </div>
+                                <h5>Create New Auction</h5>
+                                <p class="text-muted mb-0">Set up a new auction event</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom-0 py-3">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>System Info</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">PHP Version</span>
+                        <span class="fw-medium"><?= phpversion() ?></span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Current Time</span>
+                        <span class="fw-medium"><?= date('Y-m-d H:i:s') ?></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .icon-circle i {
+        font-size: 1.5rem;
+    }
+    
+    .icon-shape {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .icon-shape i {
+        font-size: 1.25rem;
+    }
+</style> 

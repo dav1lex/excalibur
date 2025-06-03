@@ -166,6 +166,45 @@ class AdminController extends BaseController
         ]);
     }
 
+    public function viewLot($id = null)
+    {
+        $this->ensureAdmin();
+        
+        if (!$id) {
+            $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        }
+        
+        $lot = $this->lotModel->getById($id);
+        
+        if (!$lot) {
+            $this->setErrorMessage('Lot not found');
+            $this->redirect(BASE_URL . 'admin/lots');
+            return;
+        }
+        
+        // Get auction info
+        $auction = $this->auctionModel->getById($lot['auction_id']);
+        
+        // Get bid history
+        $bidModel = new Bid();
+        $bids = $bidModel->getByLotId($id);
+        
+        // Determine winner (highest bidder if auction has ended)
+        $winner = null;
+        if ($auction['status'] === 'ended' && !empty($bids)) {
+            $winner = $bids[0]; // Bids are ordered by amount DESC
+        }
+        
+        $this->render('admin/view_lot', [
+            'title' => 'View Lot: ' . $lot['title'] . ' - ' . SITE_NAME,
+            'user' => $this->getCurrentUser(),
+            'lot' => $lot,
+            'auction' => $auction,
+            'bids' => $bids,
+            'winner' => $winner
+        ]);
+    }
+
     public function auctions()
     {
         $this->ensureAdmin();

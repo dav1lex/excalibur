@@ -11,7 +11,11 @@
                         <a href="<?= BASE_URL ?>login" class="btn btn-outline-secondary btn-lg px-4">Login</a>
                     <?php else: ?>
                         <a href="<?= BASE_URL ?>auctions" class="btn btn-primary btn-lg px-4 me-md-2">Browse Auctions</a>
-                        <a href="<?= BASE_URL ?>user/dashboard" class="btn btn-outline-primary btn-lg px-4">My Dashboard</a>
+                        <?php if ($_SESSION['user_role'] == 'admin'): ?>
+                            <a href="<?= BASE_URL ?>admin/dashboard" class="btn btn-outline-primary btn-lg px-4">Admin Panel</a>
+                        <?php else: ?>
+                            <a href="<?= BASE_URL ?>user/dashboard" class="btn btn-outline-primary btn-lg px-4">Dashboard</a>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>

@@ -252,7 +252,7 @@ class AuctionController extends BaseController
             $this->setErrorMessage('Error updating auction');
         }
 
-        $this->redirect(BASE_URL . 'admin/auctions');
+        $this->redirect(BASE_URL . 'auctions/edit/' . $id);
     }
 
     /**
