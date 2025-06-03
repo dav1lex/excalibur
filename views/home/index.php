@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="col-md-4 d-none d-md-block text-center">
-                <img src="<?= BASE_URL ?>public/img/auction-gavel.jpg" alt="Auction Gavel" class="img-fluid rounded-circle shadow" style="max-width: 80%;">
+                <img src="<?= BASE_URL ?>public/img/auction-gavel.jpg" alt="Auction Gavel" class="img-fluid  shadow" style="max-width: 100%;">
             </div>
         </div>
     </div>

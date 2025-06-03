@@ -8,11 +8,11 @@
 - [x] Login/Register pages
 
 ## Phase 2: Authentication & Basic Admin
-- [x] User authentication system
-- [x] Session management
-- [x] Admin dashboard (basic)
-- [x] User management (view, edit, delete)
-- [x] Role-based navigation (admin vs user)
+- [x] User authentication system  = wors
+- [x] Session management = works
+- [x] Admin dashboard (basic) = works
+- [x] User management (view, edit, delete) =for admin, yes works
+- [x] Role-based navigation (admin vs user) =yes
 
 ## Phase 3: Auction Management
 - [x] Auction CRUD operations
@@ -28,7 +28,7 @@
 ## Phase 4: Bidding System
 - [x] Bid placement functionality //seems ok for now
 - [x] Proxy bidding system //kinda works, needs more logic
-- [x] Watchlist functionality // doesnt work yet
+- [x] Watchlist functionality 
 - [x] Countdown timers
 - [x] Bid history display
 - [x] User's bid history page

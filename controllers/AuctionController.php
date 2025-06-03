@@ -107,11 +107,7 @@ class AuctionController extends BaseController
     public function create()
     {
         // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+       $this->isAdmin();
 
         $this->render('admin/create_auction', [
             'title' => 'Create Auction - ' . SITE_NAME,

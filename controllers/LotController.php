@@ -26,6 +26,8 @@ class LotController extends BaseController
      */
     public function view($id = null)
     {
+        // $this->ensureAdmin(); // Assuming view is public, commented out for now. Confirm if admin-only.
+
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
         }
@@ -76,12 +78,7 @@ class LotController extends BaseController
      */
     public function create($auction_id = null)
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         if (!$auction_id) {
             $auction_id = isset($_GET['auction_id']) ? (int) $_GET['auction_id'] : 0;
@@ -115,12 +112,7 @@ class LotController extends BaseController
      */
     public function store()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect(BASE_URL . 'admin/auctions');
@@ -206,12 +198,8 @@ class LotController extends BaseController
      */
     public function edit($id = null)
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
+        
 
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -241,12 +229,7 @@ class LotController extends BaseController
      */
     public function update($id = null)
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         // If id is not in the path, get it from query params
         if (!$id && isset($_GET['id'])) {
@@ -276,14 +259,12 @@ class LotController extends BaseController
         $starting_price = isset($_POST['starting_price']) ? (int) $_POST['starting_price'] : 0;
         $reserve_price = isset($_POST['reserve_price']) && $_POST['reserve_price'] !== '' ? (int) $_POST['reserve_price'] : null;
 
-        // Basic validation
         if (empty($title) || empty($description) || empty($lot_number) || $starting_price <= 0) {
             $this->setErrorMessage('Please fill in all required fields with valid values');
             $this->redirect(BASE_URL . 'lots/edit/' . $id);
             return;
         }
 
-        // Prepare lot data
         $lotData = [
             'title' => $title,
             'description' => $description,
@@ -292,8 +273,6 @@ class LotController extends BaseController
             'reserve_price' => $reserve_price
         ];
 
-        // If starting_price is being changed AND there are no bids on this lot,
-        // then current_price should also be updated to the new starting_price.
         if (isset($lotData['starting_price']) && $lotData['starting_price'] != $lot['starting_price']) {
             $bidCount = $this->bidModel->countByLot($id);
             if ($bidCount == 0) {
@@ -301,7 +280,6 @@ class LotController extends BaseController
             }
         }
 
-        // Process image if uploaded
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             // Configure file upload
             $target_dir = 'public/uploads/lots/';
@@ -360,12 +338,7 @@ class LotController extends BaseController
      */
     public function delete($id = null)
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -381,12 +354,10 @@ class LotController extends BaseController
 
         $auction_id = $lot['auction_id'];
 
-        // Delete lot image if exists
         if (!empty($lot['image_path']) && file_exists($lot['image_path'])) {
             unlink($lot['image_path']);
         }
 
-        // Delete lot
         $result = $this->lotModel->delete($id);
 
         if ($result) {

@@ -1,34 +1,25 @@
 <?php
 class BaseController {
-    // Render a view with data
     protected function render($view, $data = []) {
-        // Extract data to make variables available in view
         extract($data);
-        
-        // Start output buffering
         ob_start();
         
-        // Check if this is an admin or user view
         if (strpos($view, 'admin/') === 0) {
-            // For admin views, use admin layout
             include_once "views/layouts/admin_layout.php";
         } else if (strpos($view, 'user/') === 0) {
-            // For user views, use user layout
             include_once "views/layouts/user_layout.php";
         } else {
-            // For regular views, use standard layout
             include_once "views/layouts/header.php";
             include_once "views/{$view}.php";
             include_once "views/layouts/footer.php";
         }
         
-        // Get content and end buffering
         $content = ob_get_clean();
         
         echo $content;
     }
     
-    // Redirect to a URL
+    // Redirect to URL
     protected function redirect($url) {
         header("Location: {$url}");
         exit;
@@ -67,13 +58,21 @@ class BaseController {
         return null;
     }
     
-    // Display error message
+    //  error message
     protected function setErrorMessage($message) {
         $_SESSION['error_message'] = $message;
     }
     
-    // Display success message
+    //  success message
     protected function setSuccessMessage($message) {
         $_SESSION['success_message'] = $message;
+    }
+
+    protected function ensureAdmin() {
+        if (!$this->isAdmin()) {
+            $this->setErrorMessage('Access denied. Admin privileges required.');
+            $this->redirect(BASE_URL);
+            exit; // remember, good practice to use exit
+        }
     }
 } 

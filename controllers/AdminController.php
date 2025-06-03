@@ -22,11 +22,7 @@ class AdminController extends BaseController
 
     public function dashboard()
     {
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         $stats = [
             'totalUsers' => count($this->userModel->getAll()),
@@ -44,11 +40,8 @@ class AdminController extends BaseController
 
     public function users()
     {
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
+
 
         $users = $this->userModel->getAll();
 
@@ -61,12 +54,7 @@ class AdminController extends BaseController
 
     public function editUser($id = null)
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -89,13 +77,7 @@ class AdminController extends BaseController
 
     public function updateUser()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-
+        $this->ensureAdmin();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect(BASE_URL . 'admin/users');
             return;
@@ -104,7 +86,6 @@ class AdminController extends BaseController
         $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
         $name = $_POST['name'] ?? '';
         $email = $_POST['email'] ?? '';
-        $role = $_POST['role'] ?? 'user';
         $password = $_POST['password'] ?? '';
 
         // Validate input
@@ -118,7 +99,6 @@ class AdminController extends BaseController
         $data = [
             'name' => $name,
             'email' => $email,
-            'role' => $role
         ];
 
         // Add password if it's provided
@@ -138,12 +118,7 @@ class AdminController extends BaseController
 
     public function deleteUser()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -166,15 +141,9 @@ class AdminController extends BaseController
 
     public function lots()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-
+        $this->ensureAdmin();
         // Get auction filter if provided
-        $auction_id = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : null;
+        $auction_id = isset($_GET['auction_id']) ? (int) $_GET['auction_id'] : null;
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
         // Get all auctions for the dropdown
@@ -199,36 +168,22 @@ class AdminController extends BaseController
 
     public function auctions()
     {
-        error_log('ADMINCONTROLLER AUCTIONS METHOD REACHED - TOP'); // Basic check
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-
+        $this->ensureAdmin();
         $status = isset($_GET['status']) ? $_GET['status'] : null;
-        error_log('AdminController: auctions() method. Status filter from GET: ' . print_r($status, true));
-
         if ($status) {
             $auctions = $this->auctionModel->getByStatus($status);
-            error_log('AdminController: Fetched auctions WITH status filter (' . $status . '): ' . print_r($auctions, true));
         } else {
             $auctions = $this->auctionModel->getAll();
-            error_log('AdminController: Fetched auctions WITHOUT status filter: ' . print_r($auctions, true));
         }
 
-        // Count lots for each auction
         $lotCounts = [];
         if (!empty($auctions)) {
             foreach ($auctions as $auction) {
                 $auction_id = $auction['id'];
                 $count = $this->lotModel->countByAuction($auction_id);
-                error_log("AdminController: Lot count for auction ID {$auction_id}: {$count}");
                 $lotCounts[$auction_id] = $count;
             }
         }
-        error_log('AdminController: Final lotCounts array: ' . print_r($lotCounts, true));
-        error_log('AdminController: Current filter for view: ' . ($status ?? 'all'));
 
         $this->render('admin/auctions', [
             'title' => 'Manage Auctions - ' . SITE_NAME,
@@ -241,15 +196,8 @@ class AdminController extends BaseController
 
     public function bids()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-
+        $this->ensureAdmin();
         $bids = $this->bidModel->getAll();
-
         $this->render('admin/bids', [
             'title' => 'Manage Bids - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),
@@ -259,37 +207,32 @@ class AdminController extends BaseController
 
     public function deleteBid()
     {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-        
+        $this->ensureAdmin();
+
         $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-        
+
         if (!$id) {
             $this->setErrorMessage('Invalid bid ID.');
             $this->redirect(BASE_URL . 'admin/bids');
             return;
         }
-        
+
         // Get bid info before deletion for potential updates
         $bid = $this->bidModel->getById($id);
-        
+
         if (!$bid) {
             $this->setErrorMessage('Bid not found.');
             $this->redirect(BASE_URL . 'admin/bids');
             return;
         }
-        
+
         $lot_id = $bid['lot_id']; // Store lot_id before bid is deleted
 
         // Delete the bid
         if ($this->bidModel->delete($id)) {
             // After deleting a bid, always recalculate the lot's current price
             $newHighestBid = $this->bidModel->getHighestBidForLot($lot_id);
-            
+
             if ($newHighestBid) {
                 // If there are other bids, set current_price to the new highest bid amount
                 $this->lotModel->update($lot_id, ['current_price' => $newHighestBid['amount']]);
@@ -300,17 +243,12 @@ class AdminController extends BaseController
                     $this->lotModel->update($lot_id, ['current_price' => $lotDetails['starting_price']]);
                 }
             }
-            
+
             $this->setSuccessMessage('Bid deleted successfully. Lot current price updated.');
         } else {
             $this->setErrorMessage('Error deleting bid. Please try again.');
         }
-        
-        $this->redirect(BASE_URL . 'admin/bids');
-    }
 
-    protected function isAdmin()
-    {
-        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+        $this->redirect(BASE_URL . 'admin/bids');
     }
 }

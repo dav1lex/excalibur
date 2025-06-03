@@ -2,7 +2,7 @@
     <div class="col-md-6">
         <h1 class="display-5 mb-4 border-bottom pb-2">Manage Lots</h1>
     </div>
-    <div class="col-md-6 text-end">
+    <div class="col-md-6 text-end align-self-center">
         <a href="<?= BASE_URL ?>admin/auctions" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Auctions
         </a>

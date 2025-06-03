@@ -65,11 +65,11 @@ class Auction extends BaseModel {
      */
     public function getLiveAuctions() {
         $now = date('Y-m-d H:i:s');
-        $sql = "SELECT * FROM auctions WHERE status = 'live' OR (start_date <= :now AND end_date >= :now AND status != 'draft') ORDER BY end_date ASC";
+        $sql = "SELECT * FROM auctions WHERE status = 'live' OR (start_date <= :now1 AND end_date >= :now2 AND status != 'draft') ORDER BY end_date ASC";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':now', $now);
+        $stmt->bindParam(':now1', $now);
+        $stmt->bindParam(':now2', $now);
         $stmt->execute();
-        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
