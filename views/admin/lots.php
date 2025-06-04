@@ -92,8 +92,8 @@
                             <tr>
                                 <th>Image</th>
                                 <th>Lot #</th>
-                                <th>Title</th>
                                 <th>Auction</th>
+                                <th>Description</th>
                                 <th>Starting Price</th>
                                 <th>Current Price</th>
                                 <th>Actions</th>
@@ -115,8 +115,10 @@
                                             <?php endif; ?>
                                         </td>
                                         <td><span class="fw-bold"><?= htmlspecialchars($lot['lot_number']) ?></span></td>
-                                        <td><?= htmlspecialchars($lot['title']) ?></td>
                                         <td><?= htmlspecialchars($lot['auction_title']) ?></td>
+                                        <td title="<?= htmlspecialchars($lot['description']) ?>">
+                                            <?= htmlspecialchars(strlen($lot['description']) > 25 ? substr($lot['description'], 0, 20) . '...' : $lot['description']) ?>
+                                        </td>
                                         <td class="text-muted"><?= number_format($lot['starting_price']) ?>€</td>
                                         <td class="fw-bold"><?= number_format($lot['current_price']) ?>€</td>
                                         <td>
