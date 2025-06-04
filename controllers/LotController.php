@@ -297,7 +297,7 @@ class LotController extends BaseController
         $lots = $this->lotModel->getByAuctionId($auction_id);
         foreach ($lots as $existingLot) {
             if ($existingLot['lot_number'] === $lot_number && $existingLot['id'] != $id) {
-                $this->setErrorMessage('Lot number already exists for this auction. Please choose a different number.');
+                $this->setErrorMessage('Lot number already exists for this auction.');
                 $this->redirect(BASE_URL . 'lots/edit/' . $id);
                 return;
             }

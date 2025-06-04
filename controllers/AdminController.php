@@ -149,10 +149,15 @@ class AdminController extends BaseController
         // Get all auctions for the dropdown
         $auctions = $this->auctionModel->getAll();
 
-        // Get lots filtered by auction if specified
-        if ($auction_id) {
+        // Get lots based on filters
+        if (!empty($search)) {
+            // If search term is provided, use search method
+            $lots = $this->lotModel->search($search, $auction_id);
+        } else if ($auction_id) {
+            // If only auction filter is provided
             $lots = $this->lotModel->getByAuctionId($auction_id);
         } else {
+            // No filters, get all lots
             $lots = $this->lotModel->getAll();
         }
 

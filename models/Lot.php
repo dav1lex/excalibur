@@ -186,4 +186,52 @@ class Lot extends BaseModel {
         
         return $stmt->fetchColumn();
     }
+    
+    /**
+     * Search lots by description, title or lot number
+     */
+    public function search($search, $auction_id = null) {
+        // Simple search query with basic conditions
+        $sql = "SELECT l.*, a.title as auction_title 
+                FROM lots l 
+                JOIN auctions a ON l.auction_id = a.id 
+                WHERE l.title LIKE ? OR l.description LIKE ?";
+        
+        // Add lot number search for numeric values
+        if (is_numeric($search)) {
+            $lot_number = 'LOT-' . sprintf("%03d", (int)$search);
+            $sql .= " OR l.lot_number = ?";
+        }
+        
+        // Add auction filter if provided
+        if ($auction_id) {
+            $sql .= " AND l.auction_id = ?";
+        }
+        
+        // Add ordering
+        $sql .= " ORDER BY l.lot_number ASC";
+        
+        // Prepare statement
+        $stmt = $this->conn->prepare($sql);
+        
+        // Create parameters array
+        $params = [];
+        $params[] = '%' . $search . '%';  // For title
+        $params[] = '%' . $search . '%';  // For description
+        
+        // Add lot number parameter if needed
+        if (is_numeric($search)) {
+            $params[] = 'LOT-' . sprintf("%03d", (int)$search);
+        }
+        
+        // Add auction_id parameter if needed
+        if ($auction_id) {
+            $params[] = $auction_id;
+        }
+        
+        // Execute with parameters array
+        $stmt->execute($params);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 } 

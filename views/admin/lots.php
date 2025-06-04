@@ -50,7 +50,7 @@
                     </div>
                     <div class="col-md-5">
                         <label for="search" class="form-label">Search Lots</label>
-                        <input type="text" class="form-control" id="search" name="search" placeholder="Search by title or lot number" value="<?= isset($search) ? htmlspecialchars($search) : '' ?>">
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Search by title, description or lot number (e.g. 001 for LOT-001)" value="<?= isset($search) ? htmlspecialchars($search) : '' ?>">
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
@@ -116,7 +116,7 @@
                                         </td>
                                         <td><span class="fw-bold"><?= htmlspecialchars($lot['lot_number']) ?></span></td>
                                         <td><?= htmlspecialchars($lot['title']) ?></td>
-                                        <td><?= htmlspecialchars($lot['title']) ?></td>
+                                        <td><?= htmlspecialchars($lot['auction_title']) ?></td>
                                         <td class="text-muted"><?= number_format($lot['starting_price']) ?>€</td>
                                         <td class="fw-bold"><?= number_format($lot['current_price']) ?>€</td>
                                         <td>
