@@ -1,24 +1,21 @@
 <div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <h1 class="h2 mb-0"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h1>
-        </div>
-        
+    <div class="col-md-6">
+        <h1 class="display-5 mb-4 border-bottom pb-2">Admin Dashboard</h1>
         <?php if (isset($_SESSION['success_message'])): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <?php unset($_SESSION['success_message']); ?>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['error_message'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($_SESSION['error_message']) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <?php unset($_SESSION['error_message']); ?>
-    <?php endif; ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($_SESSION['error_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -46,16 +43,16 @@
                         <button type="submit" class="btn btn-primary w-100">Calculate Total</button>
                     </div>
                 </form>
-                
+
                 <?php if (isset($auctionTotal) && isset($selectedAuction)): ?>
-                <div class="mt-4">
-                    <div class="alert alert-info">
-                        <h5><i class="bi bi-info-circle me-2"></i>Auction Value Summary</h5>
-                        <p class="mb-1"><strong>Auction:</strong> <?= htmlspecialchars($selectedAuction['title']) ?></p>
-                        <p class="mb-1"><strong>Total Current Value:</strong> <span class="fs-4 fw-bold">$<?= number_format($auctionTotal) ?></span></p>
-                        <p class="mb-0"><small class="text-muted">Based on current prices of all lots in this auction</small></p>
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <p class="mb-1"><strong>Current Value:</strong> <span
+                                    class="fs-4 fw-bold"><?= number_format($auctionTotal) ?>€</span></p>
+                            <p class="mb-0"><i class="bi bi-info-circle me-2"></i><small class="text-muted">Total of visible
+                                    current prices of all lots.</small></p>
+                        </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -162,7 +159,8 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>admin/users" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>admin/users"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-primary text-white mx-auto mb-3">
                                     <i class="bi bi-people"></i>
@@ -173,7 +171,8 @@
                         </a>
                     </div>
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>admin/auctions" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>admin/auctions"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-success text-white mx-auto mb-3">
                                     <i class="bi bi-calendar-event"></i>
@@ -184,7 +183,8 @@
                         </a>
                     </div>
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>admin/lots" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>admin/lots"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-info text-white mx-auto mb-3">
                                     <i class="bi bi-collection"></i>
@@ -195,7 +195,8 @@
                         </a>
                     </div>
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>auctions/create" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>auctions/create"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-dark text-white mx-auto mb-3">
                                     <i class="bi bi-plus-lg"></i>
@@ -239,11 +240,11 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .icon-circle i {
         font-size: 1.5rem;
     }
-    
+
     .icon-shape {
         width: 40px;
         height: 40px;
@@ -251,8 +252,8 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .icon-shape i {
         font-size: 1.25rem;
     }
-</style> 
+</style>

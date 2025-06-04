@@ -114,4 +114,16 @@ class User extends BaseModel {
     private function generateConfirmationToken() {
         return bin2hex(random_bytes(32));
     }
+    
+    /**
+     * Get users by role
+     */
+    public function getByRole($role) {
+        $query = "SELECT * FROM users WHERE role = :role ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':role', $role);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
 } 

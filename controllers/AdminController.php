@@ -63,14 +63,20 @@ class AdminController extends BaseController
     public function users()
     {
         $this->ensureAdmin();
-
-
-        $users = $this->userModel->getAll();
+        $role = isset($_GET['role']) ? $_GET['role'] : null;
+        
+        // Get users based on role filter
+        if ($role && in_array($role, ['admin', 'user'])) {
+            $users = $this->userModel->getByRole($role);
+        } else {
+            $users = $this->userModel->getAll();
+        }
 
         $this->render('admin/users', [
             'title' => 'Manage Users - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),
-            'users' => $users
+            'users' => $users,
+            'current_role' => $role
         ]);
     }
 
