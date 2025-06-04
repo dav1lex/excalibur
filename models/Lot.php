@@ -234,4 +234,17 @@ class Lot extends BaseModel {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    /**
+     * Calculate total current price of all lots in an auction
+     */
+    public function calculateAuctionTotal($auction_id) {
+        $sql = "SELECT SUM(current_price) as total FROM lots WHERE auction_id = :auction_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':auction_id', $auction_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
 } 

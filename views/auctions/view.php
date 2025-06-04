@@ -130,7 +130,7 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h3 mb-0"></i>Lots</h2>
+                <h2 class="h3 mb-0"><i class="bi bi-list-nested me-2"></i>Lots (<?= count($lots) ?>)</h2>
             </div>
 
             <?php if (empty($lots)): ?>
@@ -165,8 +165,10 @@
                                     </div>
                                     <h5 class="card-title"><?= htmlspecialchars($lot['title']) ?></h5>
                                     <p class="card-text small text-muted mb-3">
-                                        <?= substr(htmlspecialchars($lot['description']), 0, 80) ?>...
+                                        <?= substr(htmlspecialchars($lot['description']), 0, 20) ?>...
                                     </p>
+                                    <hr>
+                                    <div class="d-flex justify-content-between mb-2">
                                     <p class="mb-3">
                                         <strong>Starting Price:</strong><br>
                                         <span class="text-muted">$<?= number_format($lot['starting_price']) ?></span>
@@ -176,6 +178,8 @@
                                         <span
                                             class="text-success fw-bold fs-5">$<?= number_format($lot['current_price']) ?></span>
                                     </p>
+                                    </div>
+                                   
                                     <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $lot['id'] ?>" class="btn btn-primary w-100">
                                         <i class="bi bi-eye"></i> View Lot
                                     </a>

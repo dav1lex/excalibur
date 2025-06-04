@@ -30,11 +30,33 @@ class AdminController extends BaseController
             'totalLots' => $this->lotModel->countTotal(),
             'totalBids' => $this->bidModel->countTotal() ?? 0
         ];
+        
+        // Get all auctions 
+        $auctions = $this->auctionModel->getAll();
+        
+        // Check if is selected
+        $auctionTotal = null;
+        $selectedAuction = null;
+        
+        if (isset($_GET['auction_id']) && !empty($_GET['auction_id'])) {
+            $auction_id = (int)$_GET['auction_id'];
+            
+            // Get
+            $selectedAuction = $this->auctionModel->getById($auction_id);
+            
+            if ($selectedAuction) {
+                // Calculate from method
+                $auctionTotal = $this->lotModel->calculateAuctionTotal($auction_id);
+            }
+        }
 
         $this->render('admin/dashboard', [
             'title' => 'Admin Dashboard - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),
-            'stats' => $stats
+            'stats' => $stats,
+            'auctions' => $auctions,
+            'auctionTotal' => $auctionTotal,
+            'selectedAuction' => $selectedAuction
         ]);
     }
 

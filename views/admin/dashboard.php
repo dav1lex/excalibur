@@ -22,6 +22,46 @@
     </div>
 </div>
 
+<!-- Auction Total Value Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Auction Value Calculator</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="" class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="auction_id" class="form-label">Select Auction</label>
+                        <select name="auction_id" id="auction_id" class="form-select">
+                            <option value="">-- Select an auction --</option>
+                            <?php foreach ($auctions as $auction): ?>
+                                <option value="<?= $auction['id'] ?>" <?= isset($_GET['auction_id']) && $_GET['auction_id'] == $auction['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($auction['title']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">Calculate Total</button>
+                    </div>
+                </form>
+                
+                <?php if (isset($auctionTotal) && isset($selectedAuction)): ?>
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle me-2"></i>Auction Value Summary</h5>
+                        <p class="mb-1"><strong>Auction:</strong> <?= htmlspecialchars($selectedAuction['title']) ?></p>
+                        <p class="mb-1"><strong>Total Current Value:</strong> <span class="fs-4 fw-bold">$<?= number_format($auctionTotal) ?></span></p>
+                        <p class="mb-0"><small class="text-muted">Based on current prices of all lots in this auction</small></p>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4 mb-5">
     <div class="col-md-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 overflow-hidden">
