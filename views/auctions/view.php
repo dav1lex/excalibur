@@ -168,6 +168,10 @@
                                         <?= substr(htmlspecialchars($lot['description']), 0, 80) ?>...
                                     </p>
                                     <p class="mb-3">
+                                        <strong>Starting Price:</strong><br>
+                                        <span class="text-muted">$<?= number_format($lot['starting_price']) ?></span>
+                                    </p>
+                                    <p class="mb-3">
                                         <strong>Current Bid:</strong><br>
                                         <span
                                             class="text-success fw-bold fs-5">$<?= number_format($lot['current_price']) ?></span>

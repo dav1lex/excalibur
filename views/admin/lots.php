@@ -90,10 +90,9 @@
                     <table class="table table-striped table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Image</th>
-                                <th>Title</th>
                                 <th>Lot #</th>
+                                <th>Title</th>
                                 <th>Auction</th>
                                 <th>Starting Price</th>
                                 <th>Current Price</th>
@@ -103,12 +102,11 @@
                         <tbody>
                             <?php if (empty($lots)): ?>
                                 <tr>
-                                    <td colspan="8" class="text-center">No lots found.</td>
+                                    <td colspan="7" class="text-center">No lots found.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($lots as $lot): ?>
                                     <tr>
-                                        <td><?= $lot['id'] ?></td>
                                         <td>
                                             <?php if (!empty($lot['image_path'])): ?>
                                                 <img src="<?= BASE_URL . htmlspecialchars($lot['image_path']) ?>" alt="Lot Image" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
@@ -116,11 +114,11 @@
                                                 <span class="badge bg-secondary">No Image</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td><span class="fw-bold"><?= htmlspecialchars($lot['lot_number']) ?></span></td>
                                         <td><?= htmlspecialchars($lot['title']) ?></td>
-                                        <td><?= htmlspecialchars($lot['lot_number']) ?></td>
                                         <td><?= htmlspecialchars($lot['title']) ?></td>
-                                        <td style="font-weight: bold;"><?= number_format($lot['starting_price']) ?>€</td>
-                                        <td style="font-weight: bold;"><?= number_format($lot['current_price']) ?>€</td>
+                                        <td class="text-muted"><?= number_format($lot['starting_price']) ?>€</td>
+                                        <td class="fw-bold"><?= number_format($lot['current_price']) ?>€</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="<?= BASE_URL ?>admin/view-lot?id=<?= $lot['id'] ?>" class="btn btn-info" title="View">

@@ -46,7 +46,20 @@
                     
                     <div class="mb-3">
                         <label for="lot_number" class="form-label">Lot Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="lot_number" name="lot_number" value="<?= htmlspecialchars($lot['lot_number']) ?>" required>
+                        <?php
+                        // Extract the numeric part of the lot number
+                        $numericPart = '';
+                        if (strpos($lot['lot_number'], 'LOT-') === 0) {
+                            $numericPart = substr($lot['lot_number'], 4);
+                        } else {
+                            $numericPart = $lot['lot_number'];
+                        }
+                        ?>
+                        <div class="input-group">
+                            <span class="input-group-text">LOT-</span>
+                            <input type="text" class="form-control" id="lot_number" name="lot_number" pattern="[0-9]{1,3}" maxlength="3" value="<?= htmlspecialchars($numericPart) ?>" required>
+                        </div>
+                        <div class="form-text">Enter a number, it will be formatted as LOT-001, LOT-002, etc.</div>
                     </div>
                     
                     <div class="mb-3">

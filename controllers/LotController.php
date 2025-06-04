@@ -99,11 +99,23 @@ class LotController extends BaseController
             $this->redirect(BASE_URL . 'admin/auctions');
             return;
         }
+        
+        // Get the last lot number for this auction
+        $lots = $this->lotModel->getByAuctionId($auction_id);
+        $lastLotNumber = null;
+        
+        if (!empty($lots)) {
+            $lastLot = end($lots);
+            if (strpos($lastLot['lot_number'], 'LOT-') === 0) {
+                $lastLotNumber = $lastLot['lot_number'];
+            }
+        }
 
         $this->render('admin/create_lot', [
             'title' => 'Add Lot - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),
-            'auction' => $auction
+            'auction' => $auction,
+            'lastLotNumber' => $lastLotNumber
         ]);
     }
 
@@ -133,6 +145,19 @@ class LotController extends BaseController
             $this->setErrorMessage('Please fill in all required fields with valid values');
             $this->redirect(BASE_URL . 'lots/create?auction_id=' . $auction_id);
             return;
+        }
+        
+        // Format lot number as LOT-XXX
+        $lot_number = sprintf("LOT-%03d", (int)$lot_number);
+        
+        // Check if lot number already exists for this auction
+        $lots = $this->lotModel->getByAuctionId($auction_id);
+        foreach ($lots as $lot) {
+            if ($lot['lot_number'] === $lot_number) {
+                $this->setErrorMessage('Lot number already exists.');
+                $this->redirect(BASE_URL . 'lots/create?auction_id=' . $auction_id);
+                return;
+            }
         }
 
         // Process image if uploaded
@@ -263,6 +288,19 @@ class LotController extends BaseController
             $this->setErrorMessage('Please fill in all required fields with valid values');
             $this->redirect(BASE_URL . 'lots/edit/' . $id);
             return;
+        }
+        
+        // Format lot number as LOT-XXX
+        $lot_number = sprintf("LOT-%03d", (int)$lot_number);
+        
+        // Check if lot number already exists for this auction (excluding current lot)
+        $lots = $this->lotModel->getByAuctionId($auction_id);
+        foreach ($lots as $existingLot) {
+            if ($existingLot['lot_number'] === $lot_number && $existingLot['id'] != $id) {
+                $this->setErrorMessage('Lot number already exists for this auction. Please choose a different number.');
+                $this->redirect(BASE_URL . 'lots/edit/' . $id);
+                return;
+            }
         }
 
         $lotData = [

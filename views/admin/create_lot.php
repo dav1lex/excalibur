@@ -46,8 +46,17 @@
                     
                     <div class="mb-3">
                         <label for="lot_number" class="form-label">Lot Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="lot_number" name="lot_number" required>
-                        <div class="form-text">Unique identifier for this lot within the auction (e.g. "LOT-001")</div>
+                        <div class="input-group">
+                            <span class="input-group-text">LOT-</span>
+                            <input type="text" class="form-control" id="lot_number" name="lot_number" pattern="[0-9]{1,3}" maxlength="3" required placeholder="e.g. 001">
+                        </div>
+                        <div class="form-text">
+                            <?php if (isset($lastLotNumber)): ?>
+                                Last lot number: <?= htmlspecialchars($lastLotNumber) ?>
+                            <?php else: ?>
+                                Enter lot number, it will be formatted as LOT-001, LOT-002, etc.
+                            <?php endif; ?>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
