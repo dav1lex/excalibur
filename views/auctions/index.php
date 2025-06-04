@@ -105,7 +105,6 @@
 </div>
 
 <style>
-/* Make sure the content area takes up at least the full viewport height minus the header and footer */
 body {
     display: flex;
     flex-direction: column;
@@ -116,12 +115,5 @@ main {
     flex: 1;
 }
 
-/* Add some hover effects to the cards */
-.card {
-    transition: transform 0.3s ease;
-}
 
-.card:hover {
-    transform: translateY(-5px);
-}
 </style> 

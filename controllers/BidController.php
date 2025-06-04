@@ -163,7 +163,7 @@ class BidController extends BaseController
 
         if (!$lot_id) {
             $this->setErrorMessage('Lot ID is required.');
-            $this->redirectBack(); // implement later
+            $this->redirectBack(); 
             return;
         }
 
@@ -184,8 +184,8 @@ class BidController extends BaseController
             $this->setErrorMessage('There was an error adding this lot to your watchlist.');
         }
 
-        // Redirect back 
-        $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
+        // Redirect back to the auction/lot page
+        $this->redirect(BASE_URL . 'auctions/' . $lot['auction_id'] . '/lots/' . $lot_id);
     }
 
     /**
@@ -200,7 +200,7 @@ class BidController extends BaseController
             return;
         }
 
-        // Ensure this is a POST request now
+        // Ensure POST 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->setErrorMessage('Invalid request method.');
             $this->redirectBack(); 
@@ -213,6 +213,20 @@ class BidController extends BaseController
         if (!$lot_id) {
             $this->setErrorMessage('Lot ID is required.');
             $this->redirectBack();
+            return;
+        }
+        
+        // Fetch lot details to get auction_id for redirect, and to ensure lot exists
+        $lot = $this->lotModel->getById($lot_id);
+        if (!$lot) {
+            $this->setErrorMessage('Lot not found.');
+            // If lot not found, redirect to a general page, or user's watchlist if that's the referer
+            $referer = $_SERVER['HTTP_REFERER'] ?? '';
+            if (strpos($referer, 'user/watchlist') !== false) {
+                $this->redirect(BASE_URL . 'user/watchlist');
+            } else {
+                $this->redirect(BASE_URL . 'auctions');
+            }
             return;
         }
 
@@ -230,7 +244,8 @@ class BidController extends BaseController
         if (strpos($referer, 'user/watchlist') !== false) {
             $this->redirect(BASE_URL . 'user/watchlist');
         } else {
-            $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
+            // Redirect back to the auction/lot page
+            $this->redirect(BASE_URL . 'auctions/' . $lot['auction_id'] . '/lots/' . $lot_id);
         }
     }
 

@@ -26,16 +26,11 @@ footer {
 
 /* Card Styles */
 .card-auction {
-    transition: transform 0.3s;
     border: 1px solid rgba(0, 0, 0, 0.125);
     border-radius: 0.25rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.card-auction:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
 
 /* General card styles */
 .card {

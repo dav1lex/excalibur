@@ -76,11 +76,12 @@
                                 </div>
                                 <div class="card-footer bg-white border-top-0">
                                     <div class="d-flex justify-content-between">
-                                        <a href="<?= BASE_URL ?>lots/view?id=<?= $item['lot_id'] ?>" class="btn btn-sm btn-primary">View Lot</a>
-                                        <a href="<?= BASE_URL ?>watchlist/remove?lot_id=<?= $item['lot_id'] ?>" class="btn btn-sm btn-outline-danger" 
-                                           onclick="return confirm('Remove this item from your watchlist?')">
-                                            <i class="bi bi-trash"></i> Remove
-                                        </a>
+                                        <a href="<?= BASE_URL ?>auctions/<?= $item['auction_id'] ?>/lots/<?= $item['lot_id'] ?>" class="btn btn-sm btn-primary">View Lot</a>
+                                        <form action="<?= BASE_URL ?>watchlist/remove/<?= $item['lot_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this item from your watchlist?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
