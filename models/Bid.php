@@ -498,4 +498,48 @@ class Bid extends BaseModel {
         $increment = $this->getBidIncrement($currentPrice);
         return $currentPrice + $increment;
     }
+    
+    /**
+     * Count unique lots a user is currently bidding on (active bids)
+     * 
+     * @param int $user_id The user ID
+     * @return int The count of unique lots the user is bidding on
+     */
+    public function countUniqueActiveLotsByUser($user_id) {
+        $sql = "SELECT COUNT(DISTINCT b.lot_id) 
+                FROM bids b
+                JOIN lots l ON b.lot_id = l.id
+                JOIN auctions a ON l.auction_id = a.id
+                WHERE b.user_id = :user_id
+                AND a.status = 'live'";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchColumn();
+    }
+    
+    /**
+     * Calculate total value of items a user has won
+     * 
+     * @param int $user_id The user ID
+     * @return int The total value of won items
+     */
+    public function getTotalWonItemsValue($user_id) {
+        $sql = "SELECT SUM(b.amount) 
+                FROM bids b
+                JOIN lots l ON b.lot_id = l.id
+                JOIN auctions a ON l.auction_id = a.id
+                WHERE b.user_id = :user_id
+                AND a.status = 'ended'
+                AND b.amount = l.current_price";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $result = $stmt->fetchColumn();
+        return $result ? $result : 0; // Return 0 if no won items
+    }
 } 

@@ -21,12 +21,24 @@ class UserController extends BaseController {
         $userId = $_SESSION['user_id'];
         $userData = $this->userModel->getById($userId);
         
+        // Load required models
+        require_once 'models/Bid.php';
+        require_once 'models/Watchlist.php';
+        
+        $bidModel = new Bid();
+        $watchlistModel = new Watchlist();
+        
         // Get user stats
         $stats = [
-            'activeBids' => 0,  // Will implement in next phase
-            'wonItems' => 0,    // Will implement in next phase
-            'watchlist' => 0    // Will implement in next phase
+            'activeBids' => $bidModel->countUniqueActiveLotsByUser($userId),
+            'wonItems' => 0,
+            'wonItemsValue' => $bidModel->getTotalWonItemsValue($userId),
+            'watchlist' => $watchlistModel->countByUser($userId)
         ];
+        
+        // Get count of won items
+        $wonBids = $bidModel->getUserWinningBids($userId);
+        $stats['wonItems'] = count($wonBids);
         
         $this->render('user/dashboard', [
             'title' => 'My Dashboard - ' . SITE_NAME,

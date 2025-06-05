@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="display-5 fw-bold mb-2"><?= $stats['activeBids'] ?></div>
-                <p class="text-muted mb-0">Bids you've placed</p>
+                <p class="text-muted mb-0">Unique lots you're bidding on</p>
                 <a href="<?= BASE_URL ?>user/bids" class="stretched-link"></a>
             </div>
             <div class="card-footer bg-primary text-white p-3">
@@ -55,8 +55,20 @@
                         <i class="bi bi-trophy"></i>
                     </div>
                 </div>
-                <div class="display-5 fw-bold mb-2"><?= $stats['wonItems'] ?></div>
-                <p class="text-muted mb-0">Items you've won</p>
+                <div class="display-5 fw-bold mb-2">
+                    <?php if (isset($stats['wonItemsValue']) && $stats['wonItemsValue'] > 0): ?>
+                        <?= number_format($stats['wonItemsValue']) ?> €
+                    <?php else: ?>
+                        <?= $stats['wonItems'] ?>
+                    <?php endif; ?>
+                </div>
+                <p class="text-muted mb-0">
+                    <?php if (isset($stats['wonItemsValue']) && $stats['wonItemsValue'] > 0): ?>
+                        Total value of won items
+                    <?php else: ?>
+                        Items you've won
+                    <?php endif; ?>
+                </p>
                 <a href="<?= BASE_URL ?>user/bids?status=won" class="stretched-link"></a>
             </div>
             <div class="card-footer bg-success text-white p-3">
