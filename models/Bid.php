@@ -62,7 +62,7 @@ class Bid extends BaseModel {
      */
     public function getByUserId($user_id, $limit = null) {
         $sql = "SELECT b.*, l.title as lot_title, l.current_price, l.image_path,
-                a.title as auction_title, a.status as auction_status, a.end_date as auction_end_date
+                a.id as auction_id, a.title as auction_title, a.status as auction_status, a.end_date as auction_end_date
                 FROM bids b
                 JOIN lots l ON b.lot_id = l.id
                 JOIN auctions a ON l.auction_id = a.id
@@ -90,7 +90,7 @@ class Bid extends BaseModel {
      */
     public function getUserWinningBids($user_id) {
         $sql = "SELECT b.*, l.title as lot_title, l.current_price, l.image_path,
-                a.title as auction_title, a.end_date as auction_end_date
+                a.id as auction_id, a.title as auction_title, a.end_date as auction_end_date
                 FROM bids b
                 JOIN lots l ON b.lot_id = l.id
                 JOIN auctions a ON l.auction_id = a.id

@@ -1,7 +1,6 @@
-<div class="container py-4">
-    <div class="row mb-4">
+<div class="row mb-4">
         <div class="col">
-            <h1 class="display-5 mb-4 border-bottom pb-2">My Watchlist</h1>
+            <h1 class="display-5 mb-3 border-bottom pb-2">My Watchlist</h1>
             
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert alert-success alert-dismissible fade show">

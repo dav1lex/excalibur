@@ -1,25 +1,23 @@
 <div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <h1 class="h2 mb-0"><i class="bi bi-speedometer2 me-2"></i>My Dashboard</h1>
-            <span class="badge bg-primary rounded-pill">Member Area</span>
-        </div>
-        
+    <div class="col">
+        <h1 class="display-5 mb-3 border-bottom pb-2">Dashboard</h1>
+
+
         <?php if (isset($_SESSION['success_message'])): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <?php unset($_SESSION['success_message']); ?>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['error_message'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($_SESSION['error_message']) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <?php unset($_SESSION['error_message']); ?>
-    <?php endif; ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($_SESSION['error_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -120,7 +118,7 @@
                         <p class="text-muted mb-0"><?= htmlspecialchars($userData['email']) ?></p>
                     </div>
                 </div>
-                
+
                 <div class="list-group list-group-flush mb-3">
                     <div class="list-group-item bg-light px-0">
                         <div class="row">
@@ -129,7 +127,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="text-end">
                     <a href="<?= BASE_URL ?>user/profile" class="btn btn-primary">
                         <i class="bi bi-pencil-square me-2"></i>Edit Profile
@@ -146,7 +144,8 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>auctions" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>auctions"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-primary text-white mx-auto mb-3">
                                     <i class="bi bi-search"></i>
@@ -157,7 +156,8 @@
                         </a>
                     </div>
                     <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>user/bids" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>user/bids"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-success text-white mx-auto mb-3">
                                     <i class="bi bi-cash-stack"></i>
@@ -168,7 +168,8 @@
                         </a>
                     </div>
                     <div class="col-md-12">
-                        <a href="<?= BASE_URL ?>user/watchlist" class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
+                        <a href="<?= BASE_URL ?>user/watchlist"
+                            class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-warning text-dark mx-auto mb-3">
                                     <i class="bi bi-bookmark-heart"></i>
@@ -193,11 +194,11 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .icon-circle i {
         font-size: 1.5rem;
     }
-    
+
     .icon-shape {
         width: 40px;
         height: 40px;
@@ -205,8 +206,8 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .icon-shape i {
         font-size: 1.25rem;
     }
-</style> 
+</style>

@@ -50,7 +50,7 @@
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-sm btn-outline-light mx-1" href="<?= BASE_URL ?>login"><i class="bi bi-person me-1"></i> Login</a>
+                            <a class="nav-link btn btn-sm btn-outline-secondary mx-1" href="<?= BASE_URL ?>login"><i class="bi bi-person me-1"></i> Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link btn btn-sm btn-primary mx-1" href="<?= BASE_URL ?>register">Register</a>

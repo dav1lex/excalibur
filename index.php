@@ -61,7 +61,7 @@ $router->get('/admin/delete-bid', [AdminController::class, 'deleteBid']);
 $router->get('/user/dashboard', [UserController::class, 'dashboard']);
 $router->get('/user/profile', [UserController::class, 'profile']);
 $router->post('/user/update-profile', [UserController::class, 'updateProfile']);
-$router->get('/user/bids', [BidController::class, 'myBids']);
+$router->get('/user/bids', [UserController::class, 'bids']);
 $router->get('/user/watchlist', [BidController::class, 'watchlist']);
 
 // Auction 

@@ -56,10 +56,18 @@ class UserController extends BaseController {
             return;
         }
         
-        $this->render('user/bids', [
+        // Load bid model
+        require_once 'models/Bid.php';
+        $bidModel = new Bid();
+        $userId = $_SESSION['user_id'];
+        $bids = $bidModel->getByUserId($userId);
+        $winningBids = $bidModel->getUserWinningBids($userId);
+        
+        $this->render('user/my_bids', [
             'title' => 'My Bids - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),
-            'bids' => [] // Will implement in next phase
+            'bids' => $bids,
+            'winningBids' => $winningBids
         ]);
     }
     
