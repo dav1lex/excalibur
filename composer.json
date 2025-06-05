@@ -1,6 +1,6 @@
 {
     "name": "auction/platform",
-    "description": "Auction Platform",
+    "description": "NanoBid",
     "type": "project",
     "require": {
         "phpmailer/phpmailer": "^6.8"

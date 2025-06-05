@@ -6,7 +6,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 
 // Application Configuration
-define('SITE_NAME', 'Auction Platform');
+define('SITE_NAME', 'NanoBid');
 define('BASE_URL', 'http://localhost/');  // Update lateer
 
 // File Upload Configuration

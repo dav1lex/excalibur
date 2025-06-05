@@ -6,6 +6,7 @@
     <title><?= $title ?? SITE_NAME ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="<?= BASE_URL ?>public/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -13,7 +14,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="<?= BASE_URL ?>">
                 <i class="bi bi-gem me-2"></i>
-                <span>Auction Platform</span>
+                <span>NanoBid</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

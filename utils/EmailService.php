@@ -20,7 +20,7 @@ class EmailService {
         $this->mailer->Port = 587;
         
         // Sender
-        $this->mailer->setFrom('noreply@auction-platform.com', 'Auction Platform');
+        $this->mailer->setFrom('noreply@auction-platform.com', 'NanoBid');
     }
     
     public function sendConfirmationEmail($email, $name, $token) {
@@ -45,7 +45,7 @@ class EmailService {
                 </head>
                 <body>
                     <div class="container">
-                        <h2>Welcome to Auction Platform!</h2>
+                        <h2>Welcome to NanoBid!</h2>
                         <p>Hello ' . htmlspecialchars($name) . ',</p>
                         <p>Thank you for registering. Please confirm your email address by clicking the button below:</p>
                         <p><a href="' . $confirmUrl . '" class="button">Confirm Email</a></p>
@@ -53,7 +53,7 @@ class EmailService {
                         <p>' . $confirmUrl . '</p>
                         <p>This link will expire in 24 hours.</p>
                         <p>If you did not create an account, no further action is required.</p>
-                        <p>Regards,<br>The Auction Platform Team</p>
+                        <p>Regards,<br>The NanoBid Team</p>
                     </div>
                 </body>
                 </html>
@@ -64,7 +64,7 @@ class EmailService {
                 This link will expire in 24 hours.
                 If you did not create an account, no further action is required.
                 Regards,
-                The Auction Platform Team';
+                The NanoBid Team';
             
             return $this->mailer->send();
         } catch (Exception $e) {

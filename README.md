@@ -1,4 +1,4 @@
-# Auction Platform
+# NanoBid
 
 A simple, clean auction platform for auction houses built with PHP, MySQL, and Bootstrap 5.
 

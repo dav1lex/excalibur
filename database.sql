@@ -1,4 +1,4 @@
--- Auction Platform Database Schema
+-- NanoBid Database Schema
 
 -- Drop existing tables if they exist (for clean installation)
 SET foreign_key_checks = 0;

@@ -1,4 +1,4 @@
-# Auction Platform Development Roadmap
+# NanoBid Development Roadmap
 
 ## Phase 1: Foundation Setup
 - [x] Database schema creation

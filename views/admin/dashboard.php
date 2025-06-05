@@ -158,7 +158,7 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <a href="<?= BASE_URL ?>admin/users"
                             class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
@@ -170,7 +170,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <a href="<?= BASE_URL ?>admin/auctions"
                             class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
@@ -178,11 +178,11 @@
                                     <i class="bi bi-calendar-event"></i>
                                 </div>
                                 <h5>Manage Auctions</h5>
-                                <p class="text-muted mb-0">View and manage all auction events</p>
+                                <p class="text-muted mb-0">View and manage all auctions</p>
                             </div>
                         </a>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <a href="<?= BASE_URL ?>admin/lots"
                             class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
@@ -194,15 +194,15 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-md-6">
-                        <a href="<?= BASE_URL ?>auctions/create"
+                    <div class="col-md-3">
+                        <a href="<?= BASE_URL ?>admin/bids"
                             class="card bg-light border-0 text-center h-100 p-3 text-decoration-none">
                             <div class="py-3">
                                 <div class="icon-circle bg-dark text-white mx-auto mb-3">
-                                    <i class="bi bi-plus-lg"></i>
+                                    <i class="bi bi-cash-stack"></i>
                                 </div>
-                                <h5>Create New Auction</h5>
-                                <p class="text-muted mb-0">Set up a new auction event</p>
+                                <h5>Manage Bids</h5>
+                                <p class="text-muted mb-0">View and manage all bids</p>
                             </div>
                         </a>
                     </div>

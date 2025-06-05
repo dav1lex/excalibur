@@ -1,4 +1,4 @@
-# Auction Platform Development Guide
+# NanoBid Development Guide
 
 ## Core Purpose
 Help auction houses run their own timed online auctions without paying expensive third-party platforms.
