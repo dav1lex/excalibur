@@ -25,6 +25,7 @@
                             <th>Lot</th>
                             <th>User</th>
                             <th>Amount</th>
+                            <th>Proxy</th>
                             <th>Date</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -41,6 +42,7 @@
                                 </td>
                                 <td><?= htmlspecialchars($bid['user_name'] ?? 'User #' . $bid['user_id']) ?></td>
                                 <td><?= htmlspecialchars(number_format($bid['amount'])) ?> €</td>
+                                <td><?= htmlspecialchars($bid['max_amount'] ? 'Yes' : 'No') ?></td>
                                 <td><?= htmlspecialchars(date('Y-m-d H:i', strtotime($bid['placed_at']))) ?></td>
                                 <td>
                                     <span class="badge bg-<?= $bid['status'] === 'winning' ? 'success' : 

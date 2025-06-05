@@ -23,7 +23,7 @@ Thumbs.db
 
 # Ignore all files in the public/uploads directory
 public/uploads/*
-uploads/*
+/uploads/
 # Ignore all files in the public/uploads directory
 public/uploads/*
 
