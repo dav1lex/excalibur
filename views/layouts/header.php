@@ -12,13 +12,35 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
+            <?php if (isset($isDashboardPage) && $isDashboardPage): ?>
+                <!-- Sidebar Toggle for mobile -->
+                <button class="btn btn-dark d-md-none me-2" id="sidebarToggle" type="button">
+                    <i class="bi bi-list"></i>
+                </button>
+            <?php endif; ?>
             <a class="navbar-brand d-flex align-items-center" href="<?= BASE_URL ?>">
                 <i class="bi bi-gem me-2"></i>
                 <span>NanoBid</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <!-- User menu dropdown for mobile -->
+                <div class="d-md-none dropdown">
+                    <button class="btn btn-dark" type="button" id="userMenuMobile" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuMobile">
+                        <li><a class="dropdown-item" href="<?= BASE_URL ?><?= $_SESSION['user_role'] === 'admin' ? 'admin' : 'user' ?>/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="<?= BASE_URL ?>logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            <?php endif; ?>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -31,7 +53,7 @@
                         <a class="nav-link" href="<?= BASE_URL ?>how-to-bid"><i class="bi bi-question-circle me-1"></i> How to Bid</a>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav <?php if (isset($_SESSION['user_id'])){ echo 'd-none d-md-flex'; } ?>">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <?php if ($_SESSION['user_role'] === 'admin'): ?>
                             <li class="nav-item">
@@ -61,7 +83,5 @@
             </div>
         </div>
     </nav>
-    
-    <main class="flex-grow-1">
 </body>
 </html> 

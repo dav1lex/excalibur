@@ -1,13 +1,18 @@
 <?php
 class BaseController {
     protected function render($view, $data = []) {
+        $isDashboardPage = strpos($view, 'admin/') === 0 || strpos($view, 'user/') === 0;
+        $data['isDashboardPage'] = $isDashboardPage; // this is for showing left menu only in dashboard pages
+
         extract($data);
         ob_start();
         
-        if (strpos($view, 'admin/') === 0) {
-            include_once "views/layouts/admin_layout.php";
-        } else if (strpos($view, 'user/') === 0) {
-            include_once "views/layouts/user_layout.php";
+        if ($isDashboardPage) { // this is for showing left menu only in dashboard pages, dont freak out
+            if (strpos($view, 'admin/') === 0) {
+                include_once "views/layouts/admin_layout.php";
+            } else {
+                include_once "views/layouts/user_layout.php";
+            }
         } else {
             include_once "views/layouts/header.php";
             include_once "views/{$view}.php";

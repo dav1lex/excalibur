@@ -5,13 +5,6 @@ include_once 'views/layouts/header.php';
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar toggle button for mobile -->
-        <div class="d-md-none">
-            <button class="btn btn-dark position-fixed mt-3 ms-3 rounded-circle" id="sidebarToggle" style="z-index: 1001; width: 45px; height: 45px;">
-                <i class="bi bi-list"></i>
-            </button>
-        </div>
-        
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" id="sidebar" style="min-height: calc(100vh - 56px);">
             <div class="position-sticky pt-3">
@@ -26,7 +19,7 @@ include_once 'views/layouts/header.php';
                     <div class="bg-dark text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                         <i class="bi bi-person fs-3"></i>
                     </div>
-                    <h6 class="mb-0">My Account</h6>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($user['name']) ?></h6>
                 </div>
                 
                 <div class="px-3 mb-4">
@@ -92,15 +85,12 @@ include_once 'views/layouts/header.php';
         </div>
         
         <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 content-push">
             <?php include_once "views/{$view}.php"; ?>
         </main>
     </div>
 </div>
 
-<?php
-// Add custom styles for user area
-?>
 <style>
     .sidebar {
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
@@ -129,6 +119,18 @@ include_once 'views/layouts/header.php';
     }
     
     @media (max-width: 767.98px) {
+        body {
+            overflow-x: hidden;
+        }
+
+        .content-push {
+            transition: transform 0.3s ease;
+        }
+
+        body.sidebar-open .content-push {
+            transform: translateX(280px);
+        }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -150,23 +152,40 @@ include_once 'views/layouts/header.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= BASE_URL ?>public/js/script.js"></script>
 
-<!-- Sidebar toggle script -->
+<!-- Sidebar toggle  -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarClose = document.querySelector('.sidebar-close');
         
+        // Add push class to relevant elements
+        const navbar = document.querySelector('.navbar');
+        const mainContent = document.querySelector('main');
+        if (navbar) navbar.classList.add('content-push');
+        
+        function toggleSidebar() {
+            const isMobile = window.innerWidth < 767.98;
+            sidebar.classList.toggle('show');
+            if (isMobile) {
+                document.body.classList.toggle('sidebar-open');
+            }
+        }
+
+        function closeSidebar() {
+            const isMobile = window.innerWidth < 767.98;
+            sidebar.classList.remove('show');
+            if (isMobile) {
+                document.body.classList.remove('sidebar-open');
+            }
+        }
+
         if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('show');
-            });
+            sidebarToggle.addEventListener('click', toggleSidebar);
         }
         
         if (sidebarClose && sidebar) {
-            sidebarClose.addEventListener('click', function() {
-                sidebar.classList.remove('show');
-            });
+            sidebarClose.addEventListener('click', closeSidebar);
         }
     });
 </script>

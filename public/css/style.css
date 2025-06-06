@@ -88,7 +88,7 @@ footer {
 .sidebar {
     position: sticky;
     top: 0;
-    height: calc(100vh - 56px);
+    height: 100vh;
     padding-top: 1rem;
     overflow-x: hidden;
     overflow-y: auto;

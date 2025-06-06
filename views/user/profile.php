@@ -1,33 +1,31 @@
 <div class="row mb-4">
-    <div class="col-md-6">
-        <h1 class="display-5 mb-3 border-bottom pb-2">Edit Profile</h1>
-
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success alert-dismissible fade show">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-
-                <?php unset($_SESSION['success_message']); ?>
-            <?php endif; ?>
-
-            <?php if (isset($_SESSION['error_message'])): ?>
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <?= htmlspecialchars($_SESSION['error_message']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php unset($_SESSION['error_message']); ?>
-            <?php endif; ?>
-        </div>
-
-        <div class="col-md-6 text-end d-flex align-items-center justify-content-end">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h1 class="display-5 mb-0">Edit Profile</h1>
             <a href="<?= BASE_URL ?>user/dashboard" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
+        
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['error_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
     </div>
 
     <div class="row">
-        <div class="col-8 mr-auto">
+        <div class="col">
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-light py-3">
                     <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>My Profile</h5>

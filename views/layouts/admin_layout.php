@@ -5,13 +5,6 @@ include_once 'views/layouts/header.php';
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar toggle button for mobile -->
-        <div class="d-md-none">
-            <button class="btn btn-dark position-fixed mt-3 ms-3 rounded-circle" id="sidebarToggle" style="z-index: 1001; width: 45px; height: 45px;">
-                <i class="bi bi-list"></i>
-            </button>
-        </div>
-        
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" id="sidebar" style="min-height: calc(100vh - 56px);">
             <div class="position-sticky pt-3">
@@ -92,7 +85,7 @@ include_once 'views/layouts/header.php';
         </div>
         
         <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 content-push">
             <?php include_once "views/{$view}.php"; ?>
         </main>
     </div>
@@ -126,6 +119,18 @@ include_once 'views/layouts/header.php';
     }
     
     @media (max-width: 767.98px) {
+        body {
+            overflow-x: hidden;
+        }
+
+        .content-push {
+            transition: transform 0.3s ease;
+        }
+
+        body.sidebar-open .content-push {
+            transform: translateX(280px);
+        }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -154,16 +159,32 @@ include_once 'views/layouts/header.php';
         const sidebar = document.getElementById('sidebar');
         const sidebarClose = document.querySelector('.sidebar-close');
         
+        // Add push class to relevant elements
+        const navbar = document.querySelector('.navbar');
+        if (navbar) navbar.classList.add('content-push');
+
+        function toggleSidebar() {
+            const isMobile = window.innerWidth < 767.98;
+            sidebar.classList.toggle('show');
+            if (isMobile) {
+                document.body.classList.toggle('sidebar-open');
+            }
+        }
+
+        function closeSidebar() {
+            const isMobile = window.innerWidth < 767.98;
+            sidebar.classList.remove('show');
+            if (isMobile) {
+                document.body.classList.remove('sidebar-open');
+            }
+        }
+        
         if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('show');
-            });
+            sidebarToggle.addEventListener('click', toggleSidebar);
         }
         
         if (sidebarClose && sidebar) {
-            sidebarClose.addEventListener('click', function() {
-                sidebar.classList.remove('show');
-            });
+            sidebarClose.addEventListener('click', closeSidebar);
         }
     });
 </script>
