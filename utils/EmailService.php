@@ -10,17 +10,17 @@ class EmailService {
     public function __construct() {
         $this->mailer = new PHPMailer(true);
         
-        // Server settings
-        $this->mailer->isSMTP();
-        $this->mailer->Host = 'smtp.example.com'; //  SMTP server
-        $this->mailer->SMTPAuth = true;
-        $this->mailer->Username = 'your-email@example.com'; //  email
-        $this->mailer->Password = 'your-password'; //  email password
-        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mailer->Port = 587;
-        
-        // Sender
-        $this->mailer->setFrom('noreply@auction-platform.com', 'NanoBid');
+      // Server settings
+      $this->mailer->isSMTP();
+      $this->mailer->Host = 'smtp.titancode.pl'; //  SMTP server
+      $this->mailer->SMTPAuth = true;
+      $this->mailer->Username = 'ougur'; //  email
+      $this->mailer->Password = 'Davilex12345.'; //  email password
+      $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+      $this->mailer->Port = 587;
+      
+      // Sender
+      $this->mailer->setFrom('info@titancode.pl', 'NanoBid');
     }
     
     public function sendConfirmationEmail($email, $name, $token) {
