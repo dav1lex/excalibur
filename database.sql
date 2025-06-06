@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('user', 'admin') DEFAULT 'user',
     is_confirmed TINYINT(1) DEFAULT 0,
     confirmation_token VARCHAR(100) NULL,
+    reset_token VARCHAR(100) NULL,
+    reset_token_expiry DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

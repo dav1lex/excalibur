@@ -126,4 +126,58 @@ class User extends BaseModel {
         
         return $stmt->fetchAll();
     }
+    
+    /**
+     * Create a password reset token for a user
+     */
+    public function createPasswordResetToken($email) {
+        $token = $this->generateConfirmationToken();
+        $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        
+        $query = "UPDATE users SET reset_token = :token, reset_token_expiry = :expiry WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':expiry', $expiry);
+        $stmt->bindParam(':email', $email);
+        
+        if ($stmt->execute()) {
+            return $token;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Get user by reset token
+     */
+    public function getUserByResetToken($token) {
+        $now = date('Y-m-d H:i:s');
+        
+        $query = "SELECT * FROM users WHERE reset_token = :token AND reset_token_expiry > :now";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':now', $now);
+        $stmt->execute();
+        
+        return $stmt->fetch();
+    }
+    
+    /**
+     * Reset user password
+     */
+    public function resetPassword($token, $password) {
+        $now = date('Y-m-d H:i:s');
+        
+        // Hash new password
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
+        $query = "UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL 
+                  WHERE reset_token = :token AND reset_token_expiry > :now";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':password', $hashed_password);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':now', $now);
+        
+        return $stmt->execute() && $stmt->rowCount() > 0;
+    }
 } 
