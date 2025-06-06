@@ -45,7 +45,7 @@ include_once 'views/layouts/header.php';
                 <div class="px-3 mb-4">
                     <div class="sidebar-divider mb-3 d-flex align-items-center">
                         <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
-                        <span class="mx-2 text-uppercase text-muted small fw-bold">My Activity</span>
+                        <span class="mx-2 text-uppercase text-muted small fw-bold">Activity</span>
                         <span class="bg-secondary opacity-50" style="height: 1px; flex: 1;"></span>
                     </div>
                     <ul class="nav flex-column">

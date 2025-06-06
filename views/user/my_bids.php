@@ -59,6 +59,7 @@
                     'lot_id' => $lotId,
                     'image_path' => $bid['image_path'],
                     'current_price' => $bid['current_price'],
+                    'lot_number' => $bid['lot_number'] ?? '',
                     'bids' => []
                 ];
             }
@@ -77,8 +78,8 @@
             }
         }
         
-        // sotr: live first, then upcoming, then ended
-        $statusOrder = ['live' => 1, 'upcoming' => 2, 'ended' => 3];
+        // sotr: live first, then ended
+        $statusOrder = ['live' => 1, 'ended' => 2];
         uasort($bidsByAuction, function($a, $b) use ($statusOrder) {
             return $statusOrder[$a['auction_status']] <=> $statusOrder[$b['auction_status']];
         });
@@ -91,7 +92,6 @@
                     $activeStatuses = array_unique(array_values($auctionStatuses));
                     $statusLabels = [
                         'live' => '<i class="bi bi-broadcast me-1"></i>Live Auctions',
-                        'upcoming' => '<i class="bi bi-calendar-event me-1"></i>Upcoming Auctions',
                         'ended' => '<i class="bi bi-archive me-1"></i>Past Auctions'
                     ];
                     
@@ -133,164 +133,246 @@
                              role="tabpanel" 
                              aria-labelledby="<?= $currentStatus ?>-tab">
                             
-                            <?php foreach ($bidsByAuction as $auctionId => $auction): ?>
-                                <?php if ($auction['auction_status'] === $currentStatus): ?>
-                                    <div class="auction-section p-3 border-bottom">
-                                        <h5 class="mb-3">
-                                            <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>" class="text-decoration-none">
-                                                <?= htmlspecialchars($auction['auction_title']) ?>
-                                            </a>
-                                            <?php 
-                                            $badgeClass = 'bg-secondary';
-                                            $badgeText = 'Draft';
-                                            
-                                            if ($auction['auction_status'] === 'upcoming') {
-                                                $badgeClass = 'bg-info';
-                                                $badgeText = 'Upcoming';
-                                            } elseif ($auction['auction_status'] === 'live') {
-                                                $badgeClass = 'bg-success';
-                                                $badgeText = 'Live';
-                                            } elseif ($auction['auction_status'] === 'ended') {
-                                                $badgeClass = 'bg-dark';
-                                                $badgeText = 'Ended';
-                                            }
-                                            ?>
-                                            <span class="badge <?= $badgeClass ?> ms-2"><?= $badgeText ?></span>
-                                        </h5>
+                            <?php 
+                            // Filter auctions by current status
+                            $filteredAuctions = array_filter($bidsByAuction, function($auction) use ($currentStatus) {
+                                return $auction['auction_status'] === $currentStatus;
+                            });
+                            
+                            foreach ($filteredAuctions as $auctionId => $auction): ?>
+                                <div class="auction-section p-3 border-bottom">
+                                    <h5 class="mb-3">
+                                        <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>" class="text-decoration-none">
+                                            <?= htmlspecialchars($auction['auction_title']) ?>
+                                        </a>
+                                        <?php 
+                                        $badgeClass = 'bg-secondary';
+                                        $badgeText = 'Draft';
                                         
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover mb-3">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th style="width: 40px;"></th>
-                                                        <th>Lot</th>
-                                                        <th>Your Bid</th>
-                                                        <th>Current Price</th>
-                                                        <th>Date</th>
-                                                        <th>Status</th>
-                                                        <th></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($auction['lots'] as $lotId => $lot): 
-                                                        // Get highest bid for this lot
-                                                        $highestBid = null;
-                                                        $isWinner = false;
-                                                        
-                                                        foreach ($lot['bids'] as $bid) {
-                                                            if ($highestBid === null || $bid['amount'] > $highestBid['amount']) {
-                                                                $highestBid = $bid;
-                                                            }
-                                                            
-                                                            if ($bid['amount'] == $lot['current_price'] && $currentStatus === 'ended') {
-                                                                $isWinner = true;
-                                                            }
+                                        if ($auction['auction_status'] === 'live') {
+                                            $badgeClass = 'bg-success';
+                                            $badgeText = 'Live';
+                                        } elseif ($auction['auction_status'] === 'ended') {
+                                            $badgeClass = 'bg-dark';
+                                            $badgeText = 'Ended';
+                                        }
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?> ms-2"><?= $badgeText ?></span>
+                                    </h5>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-3">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 40px;"></th>
+                                                    <th>Lot</th>
+                                                    <th>Winning Bid</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($auction['lots'] as $lotId => $lot): 
+                                                    // Get highest bid for this lot
+                                                    $highestBid = null;
+                                                    $isWinner = false;
+                                                    
+                                                    foreach ($lot['bids'] as $bid) {
+                                                        if ($highestBid === null || $bid['amount'] > $highestBid['amount']) {
+                                                            $highestBid = $bid;
                                                         }
                                                         
-                                                        if (!$highestBid) continue;
-                                                    ?>
-                                                        <tr class="<?= $isWinner ? 'table-success' : '' ?>">
-                                                            <td class="align-middle">
-                                                                <div class="lot-image rounded bg-white border" style="width: 40px; height: 30px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                                                                    <?php if (!empty($lot['image_path'])): ?>
-                                                                        <img src="<?= BASE_URL . htmlspecialchars($lot['image_path']) ?>" class="img-fluid" alt="" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                                                                    <?php else: ?>
-                                                                        <i class="bi bi-image text-secondary" style="font-size: 1rem; opacity: 0.5;"></i>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle">
-                                                                <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>/lots/<?= $lotId ?>" class="text-decoration-none fw-medium">
-                                                                    <?= htmlspecialchars($lot['lot_title']) ?>
-                                                                </a>
-                                                            </td>
-                                                            <td class="align-middle">
-                                                                <span class="fw-bold"><?= number_format($highestBid['amount']) ?> €</span>
-                                                                <?php if (!empty($highestBid['max_amount'])): ?>
-                                                                    <br><small class="text-muted">Max: <?= number_format($highestBid['max_amount']) ?> €</small>
+                                                        if ($bid['amount'] == $lot['current_price'] && $currentStatus === 'ended') {
+                                                            $isWinner = true;
+                                                        }
+                                                    }
+                                                    
+                                                    if (!$highestBid) continue;
+                                                ?>
+                                                    <tr class="<?= $isWinner ? 'table-success' : '' ?>">
+                                                        <td class="align-middle">
+                                                            <div class="lot-image rounded bg-white border" style="width: 40px; height: 30px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                                                <?php if (!empty($lot['image_path'])): ?>
+                                                                    <img src="<?= BASE_URL . htmlspecialchars($lot['image_path']) ?>" class="img-fluid" alt="" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                                                                <?php else: ?>
+                                                                    <i class="bi bi-image text-secondary" style="font-size: 1rem; opacity: 0.5;"></i>
                                                                 <?php endif; ?>
-                                                            </td>
-                                                            <td class="align-middle"><?= number_format($lot['current_price']) ?> €</td>
-                                                            <td class="align-middle"><?= date('M j, g:i A', strtotime($highestBid['placed_at'])) ?></td>
-                                                            <td class="align-middle">
-                                                                <?php 
-                                                                if ($highestBid['amount'] == $lot['current_price']) {
-                                                                    if ($currentStatus === 'ended') {
-                                                                        echo '<span class="badge bg-success">Won</span>';
-                                                                    } else {
-                                                                        echo '<span class="badge bg-primary">Highest</span>';
-                                                                    }
-                                                                } else {
-                                                                    echo '<span class="badge bg-secondary">Outbid</span>';
-                                                                }
-                                                                ?>
-                                                            </td>
-                                                            <td class="align-middle text-end">
-                                                                <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>/lots/<?= $lotId ?>" class="btn btn-sm btn-outline-primary">
-                                                                    <i class="bi bi-eye"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
+                                                            </div>
+                                                        </td>
+                                                        <td class="align-middle">
+                                                            <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>/lots/<?= $lotId ?>" class="text-decoration-none fw-medium">
+                                                                <?= htmlspecialchars($lot['lot_number'] ?: $lot['lot_title']) ?>
+                                                            </a>
+                                                        </td>
                                                         
-                                                        <?php if (count($lot['bids']) > 1): ?>
-                                                        <tr class="bid-history-row">
-                                                            <td colspan="7" class="p-0">
-                                                                <div class="bid-history bg-light p-2" style="display: none;">
-                                                                    <h6 class="mb-2 ps-2 small fw-bold">Bid History</h6>
-                                                                    <table class="table table-sm mb-0">
-                                                                        <thead>
+                                                        <td class="align-middle"><?= number_format($lot['current_price']) ?> €</td>
+                                                        <td class="align-middle">
+                                                            <?php 
+                                                            if ($highestBid['amount'] == $lot['current_price']) {
+                                                                if ($currentStatus === 'ended') {
+                                                                    echo '<span class="badge bg-success">Won</span>';
+                                                                } else {
+                                                                    echo '<span class="badge bg-primary">Highest</span>';
+                                                                }
+                                                            } else {
+                                                                echo '<span class="badge bg-secondary">Outbid</span>';
+                                                            }
+                                                            ?>
+                                                        </td>
+                                                        <td class="align-middle"><?= date('M j, g:i A', strtotime($highestBid['placed_at'])) ?></td>
+                                                        <td class="align-middle text-end">
+                                                            <a href="<?= BASE_URL ?>auctions/<?= $auctionId ?>/lots/<?= $lotId ?>" class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                    <?php if (count($lot['bids']) > 1): ?>
+                                                    <tr class="bid-history-row">
+                                                        <td colspan="7" class="p-0">
+                                                            <div class="bid-history bg-light p-2" style="display: none;">
+                                                                <h6 class="mb-2 ps-2 small fw-bold">Bid History</h6>
+                                                                <table class="table table-sm mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Date</th>
+                                                                            <th>Amount</th>
+                                                                            <th>Max</th>
+                                                                            <th>Status</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php 
+                                                                        // Sort bids by date descending
+                                                                        usort($lot['bids'], function($a, $b) {
+                                                                            return strtotime($b['placed_at']) - strtotime($a['placed_at']);
+                                                                        });
+                                                                        
+                                                                        foreach ($lot['bids'] as $bid): 
+                                                                            if ($bid['id'] == $highestBid['id']) continue; // Skip the highest bid as it's shown in the main row
+                                                                        ?>
                                                                             <tr>
-                                                                                <th>Date</th>
-                                                                                <th>Amount</th>
-                                                                                <th>Max</th>
-                                                                                <th>Status</th>
+                                                                                <td><?= date('M j, g:i A', strtotime($bid['placed_at'])) ?></td>
+                                                                                <td class="fw-medium"><?= number_format($bid['amount']) ?> €</td>
+                                                                                <td>
+                                                                                    <?php if (!empty($bid['max_amount'])): ?>
+                                                                                        <span class="text-muted"><?= number_format($bid['max_amount']) ?> €</span>
+                                                                                    <?php else: ?>
+                                                                                        <span class="text-muted">—</span>
+                                                                                    <?php endif; ?>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span class="badge bg-secondary">Outbid</span>
+                                                                                </td>
                                                                             </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <?php 
-                                                                            // Sort bids by date descending
-                                                                            usort($lot['bids'], function($a, $b) {
-                                                                                return strtotime($b['placed_at']) - strtotime($a['placed_at']);
-                                                                            });
-                                                                            
-                                                                            foreach ($lot['bids'] as $bid): 
-                                                                                if ($bid['id'] == $highestBid['id']) continue; // Skip the highest bid as it's shown in the main row
-                                                                            ?>
-                                                                                <tr>
-                                                                                    <td><?= date('M j, g:i A', strtotime($bid['placed_at'])) ?></td>
-                                                                                    <td class="fw-medium"><?= number_format($bid['amount']) ?> €</td>
-                                                                                    <td>
-                                                                                        <?php if (!empty($bid['max_amount'])): ?>
-                                                                                            <span class="text-muted"><?= number_format($bid['max_amount']) ?> €</span>
-                                                                                        <?php else: ?>
-                                                                                            <span class="text-muted">—</span>
-                                                                                        <?php endif; ?>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <span class="badge bg-secondary">Outbid</span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            <?php endforeach; ?>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="table-light">
-                                                            <td colspan="7" class="text-center p-1">
-                                                                <button type="button" class="btn btn-sm btn-link text-muted toggle-bid-history">
-                                                                    <span class="show-text"><i class="bi bi-chevron-down"></i> Show Bid History (<?= count($lot['bids']) - 1 ?>)</span>
-                                                                    <span class="hide-text" style="display: none;"><i class="bi bi-chevron-up"></i> Hide Bid History</span>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        <?php endif; ?>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                                        <?php endforeach; ?>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="table-light">
+                                                        <td colspan="7" class="text-center p-1">
+                                                            <button type="button" class="btn btn-sm btn-link text-muted toggle-bid-history">
+                                                                <span class="show-text"><i class="bi bi-chevron-down"></i> Show Bid History (<?= count($lot['bids']) - 1 ?>)</span>
+                                                                <span class="hide-text" style="display: none;"><i class="bi bi-chevron-up"></i> Hide Bid History</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                <?php endif; ?>
+                                    
+                                    <?php if ($currentStatus === 'ended'): ?>
+                                        <?php
+                                        // Calculate payment summary for won items
+                                        $wonItems = 0;
+                                        $totalHammerPrice = 0;
+                                        
+                                        foreach ($auction['lots'] as $lot) {
+                                            // Check if user has won this lot
+                                            $isWon = false;
+                                            foreach ($lot['bids'] as $bid) {
+                                                if ($bid['amount'] == $lot['current_price']) {
+                                                    $isWon = true;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if ($isWon) {
+                                                $wonItems++;
+                                                $totalHammerPrice += $lot['current_price'];
+                                            }
+                                        }
+                                        
+                                        // Only show payment summary if user has won items
+                                        if ($wonItems > 0):
+                                            $premiumAmount = $totalHammerPrice * 0.15;
+                                            $totalPayment = $totalHammerPrice + $premiumAmount;
+                                        ?>
+                                        <div class="payment-summary-container mt-3">
+                                            <div class="d-flex justify-content-between align-items-center bg-light p-3 border rounded">
+                                                <div>
+                                                    <span class="fw-bold"><i class="bi bi-credit-card me-2"></i> Pay <span class="text-primary"><?= number_format($totalPayment) ?> €</span></span>
+                                                    <span class="text-muted ms-2">(<?= $wonItems ?> won <?= $wonItems > 1 ? 'items' : 'item' ?>)</span>
+                                                </div>
+                                                <div>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary me-2 toggle-payment-details">
+                                                        <span class="show-details"><i class="bi bi-chevron-down"></i> View Details</span>
+                                                        <span class="hide-details" style="display: none;"><i class="bi bi-chevron-up"></i> Hide Details</span>
+                                                    </button>
+                                                    <a href="#" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-credit-card me-1"></i> Pay Now
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="payment-details bg-light p-3 border-start border-end border-bottom rounded-bottom" style="display: none;">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6 class="fw-bold mb-3">Payment Details</h6>
+                                                        <p class="mb-1">Won Items: <span class="fw-medium"><?= $wonItems ?></span></p>
+                                                        <p class="mb-1">Total Hammer Price: <span class="fw-medium"><?= number_format($totalHammerPrice) ?> €</span></p>
+                                                        <p class="mb-1">Buyer's Premium (15%): <span class="fw-medium"><?= number_format($premiumAmount) ?> €</span></p>
+                                                        <p class="mb-0 fw-bold">Total Payment Due: <span class="text-primary"><?= number_format($totalPayment) ?> €</span></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="fw-bold mb-3">Won Items</h6>
+                                                        <ul class="list-unstyled">
+                                                            <?php 
+                                                            $count = 0;
+                                                            foreach ($auction['lots'] as $lot) {
+                                                                $isWon = false;
+                                                                foreach ($lot['bids'] as $bid) {
+                                                                    if ($bid['amount'] == $lot['current_price']) {
+                                                                        $isWon = true;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                
+                                                                if ($isWon) {
+                                                                    $count++;
+                                                                    echo '<li class="mb-1">' . htmlspecialchars($lot['lot_number'] ?: $lot['lot_title']) . ': <span class="fw-medium">' . number_format($lot['current_price']) . ' €</span></li>';
+                                                                    
+                                                                    // Limit to 5 items to avoid too long list
+                                                                    if ($count >= 5 && count($auction['lots']) > 5) {
+                                                                        echo '<li class="text-muted">+ ' . ($wonItems - 5) . ' more items</li>';
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+                                                            ?>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
                             <?php endforeach; ?>
                         </div>
                         <?php $firstPane = false; ?>
@@ -337,6 +419,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 bidHistory.style.display = 'none';
                 showText.style.display = 'inline';
                 hideText.style.display = 'none';
+            }
+        });
+    });
+
+    // Toggle payment details
+    const togglePaymentDetails = document.querySelectorAll('.toggle-payment-details');
+    togglePaymentDetails.forEach(button => {
+        button.addEventListener('click', function() {
+            const details = this.closest('.payment-summary-container').querySelector('.payment-details');
+            const showDetails = this.querySelector('.show-details');
+            const hideDetails = this.querySelector('.hide-details');
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                showDetails.style.display = 'none';
+                hideDetails.style.display = 'inline';
+            } else {
+                details.style.display = 'none';
+                showDetails.style.display = 'inline';
+                hideDetails.style.display = 'none';
             }
         });
     });

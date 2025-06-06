@@ -14,7 +14,7 @@
         <div class="container">
             <?php if (isset($isDashboardPage) && $isDashboardPage): ?>
                 <!-- Sidebar Toggle for mobile -->
-                <button class="btn btn-dark d-md-none me-2" id="sidebarToggle" type="button">
+                <button class="btn btn-light d-md-none me-2" id="sidebarToggle" type="button">
                     <i class="bi bi-list"></i>
                 </button>
             <?php endif; ?>
@@ -26,7 +26,7 @@
             <?php if (isset($_SESSION['user_id'])): ?>
                 <!-- User menu dropdown for mobile -->
                 <div class="d-md-none dropdown">
-                    <button class="btn btn-dark" type="button" id="userMenuMobile" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-light" type="button" id="userMenuMobile" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuMobile">
