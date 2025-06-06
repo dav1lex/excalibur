@@ -97,7 +97,6 @@
                     
                     $firstTab = true;
                     foreach ($activeStatuses as $status): 
-                        // Count items in this status
                         $itemCount = 0;
                         foreach ($bidsByAuction as $auction) {
                             if ($auction['auction_status'] === $status) {
@@ -324,9 +323,6 @@
                                                         <span class="show-details"><i class="bi bi-chevron-down"></i> View Details</span>
                                                         <span class="hide-details" style="display: none;"><i class="bi bi-chevron-up"></i> Hide Details</span>
                                                     </button>
-                                                    <a href="#" class="btn btn-sm btn-primary">
-                                                        <i class="bi bi-credit-card me-1"></i> Pay Now
-                                                    </a>
                                                 </div>
                                             </div>
                                             
@@ -366,6 +362,9 @@
                                                             }
                                                             ?>
                                                         </ul>
+                                                        <a href="#" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-credit-card me-1"></i> Pay Now
+                                                    </a>
                                                     </div>
                                                 </div>
                                             </div>
