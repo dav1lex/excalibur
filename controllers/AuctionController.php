@@ -325,8 +325,8 @@ class AuctionController extends BaseController
         // Handle image upload if present
         if (isset($_FILES['auction_image']) && $_FILES['auction_image']['error'] === UPLOAD_ERR_OK) {
             // Delete old image if exists
-            if (!empty($image_path) && file_exists($image_path)) {
-                @unlink($image_path);
+            if (!empty($image_path)) {
+                $this->deleteAuctionImage($image_path);
             }
 
             $image_path = $this->handleImageUpload($_FILES['auction_image'], 'auctions');
@@ -361,7 +361,7 @@ class AuctionController extends BaseController
      */
     private function handleImageUpload($file, $folder)
     {
-        $upload_dir = 'uploads/' . $folder . '/';
+        $upload_dir = 'public/uploads/' . $folder . '/';
 
         // Create directory if it doesn't exist
         if (!file_exists($upload_dir)) {
@@ -392,16 +392,31 @@ class AuctionController extends BaseController
     }
 
     /**
+     * Delete auction image from server
+     * 
+     * @param string $image_path Path to the image file
+     * @return bool True if deletion was successful or file doesn't exist, false otherwise
+     */
+    private function deleteAuctionImage($image_path)
+    {
+        if (empty($image_path)) {
+            return true; // No image to delete
+        }
+        
+        if (file_exists($image_path)) {
+            return @unlink($image_path);
+        }
+        
+        return true; // File doesn't exist, so consider deletion successful
+    }
+
+    /**
      * Admin: Delete auction
      */
     public function delete($id = null)
     {
         // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
+        $this->ensureAdmin();
 
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -417,13 +432,16 @@ class AuctionController extends BaseController
 
         // Delete auction
         $result = $this->auctionModel->delete($id);
-
+        $currentAuction = $this->auctionModel->getById($id);
+        if (!empty($currentAuction['image_path']) && file_exists($currentAuction['image_path'])) {
+            $this->deleteAuctionImage($currentAuction['image_path']);
+        }
         if ($result) {
             $this->setSuccessMessage('Auction deleted successfully');
         } else {
             $this->setErrorMessage('Error deleting auction');
         }
-
+      
         $this->redirect(BASE_URL . 'admin/auctions');
     }
 }

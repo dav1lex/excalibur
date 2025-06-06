@@ -6,7 +6,7 @@
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-        
+
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-dismissible fade show">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>
@@ -36,23 +36,23 @@
         // Group bids by auction and lot
         $bidsByAuction = [];
         $auctionStatuses = [];
-        
+
         // Process all bids including winning bids
         $allBids = array_merge($bids, $winningBids);
-        
+
         foreach ($allBids as $bid) {
             $auctionId = $bid['auction_id'] ?? 0;
             $lotId = $bid['lot_id'];
-            
+
             if (!isset($bidsByAuction[$auctionId])) {
                 $bidsByAuction[$auctionId] = [
                     'auction_title' => $bid['auction_title'],
-                    'auction_status' => $bid['auction_status'] ?? 'ended', 
+                    'auction_status' => $bid['auction_status'] ?? 'ended',
                     'lots' => []
                 ];
                 $auctionStatuses[$auctionId] = $bid['auction_status'] ?? 'ended';
             }
-            
+
             if (!isset($bidsByAuction[$auctionId]['lots'][$lotId])) {
                 $bidsByAuction[$auctionId]['lots'][$lotId] = [
                     'lot_title' => $bid['lot_title'],
@@ -63,7 +63,7 @@
                     'bids' => []
                 ];
             }
-            
+
             // Avoid duplicate bids
             $bidExists = false;
             foreach ($bidsByAuction[$auctionId]['lots'][$lotId]['bids'] as $existingBid) {
@@ -72,19 +72,19 @@
                     break;
                 }
             }
-            
+
             if (!$bidExists) {
                 $bidsByAuction[$auctionId]['lots'][$lotId]['bids'][] = $bid;
             }
         }
-        
+
         // sotr: live first, then ended
         $statusOrder = ['live' => 1, 'ended' => 2];
-        uasort($bidsByAuction, function($a, $b) use ($statusOrder) {
+        uasort($bidsByAuction, function ($a, $b) use ($statusOrder) {
             return $statusOrder[$a['auction_status']] <=> $statusOrder[$b['auction_status']];
         });
         ?>
-        
+
         <div class="card shadow-sm border-0 rounded-3 mb-4">
             <div class="card-header bg-light py-2">
                 <ul class="nav nav-tabs card-header-tabs" id="bidTabs" role="tablist">
@@ -94,34 +94,28 @@
                         'live' => '<i class="bi bi-broadcast me-1"></i>Live Auctions',
                         'ended' => '<i class="bi bi-archive me-1"></i>Past Auctions'
                     ];
-                    
+
                     $firstTab = true;
-                    foreach ($activeStatuses as $status): 
+                    foreach ($activeStatuses as $status):
                         $itemCount = 0;
                         foreach ($bidsByAuction as $auction) {
                             if ($auction['auction_status'] === $status) {
                                 $itemCount += count($auction['lots']);
                             }
                         }
-                    ?>
+                        ?>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link <?= $firstTab ? 'active' : '' ?>" 
-                                    id="<?= $status ?>-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#<?= $status ?>-pane" 
-                                    type="button" 
-                                    role="tab" 
-                                    aria-controls="<?= $status ?>-pane" 
-                                    aria-selected="<?= $firstTab ? 'true' : 'false' ?>">
-                                <?= $statusLabels[$status] ?> 
+                            <button class="nav-link <?= $firstTab ? 'active' : '' ?>" id="<?= $status ?>-tab"
+                                data-bs-toggle="tab" data-bs-target="#<?= $status ?>-pane" type="button" role="tab"
+                                aria-controls="<?= $status ?>-pane" aria-selected="<?= $firstTab ? 'true' : 'false' ?>">
+                                <?= $statusLabels[$status] ?>
                                 <span class="badge bg-secondary rounded-pill ms-1"><?= $itemCount ?></span>
                             </button>
                         </li>
                         <?php $firstTab = false; ?>
                     <?php endforeach; ?>
-                </ul>
-            </div>
-            
+            </ul>
+        </div>
             <div class="card-body p-0">
                 <div class="tab-content" id="bidTabsContent">
                     <?php 

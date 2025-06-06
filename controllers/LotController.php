@@ -99,11 +99,11 @@ class LotController extends BaseController
             $this->redirect(BASE_URL . 'admin/auctions');
             return;
         }
-        
+
         // Get the last lot number for this auction
         $lots = $this->lotModel->getByAuctionId($auction_id);
         $lastLotNumber = null;
-        
+
         if (!empty($lots)) {
             $lastLot = end($lots);
             if (strpos($lastLot['lot_number'], 'LOT-') === 0) {
@@ -146,10 +146,10 @@ class LotController extends BaseController
             $this->redirect(BASE_URL . 'lots/create?auction_id=' . $auction_id);
             return;
         }
-        
+
         // Format lot number as LOT-XXX
-        $lot_number = sprintf("LOT-%03d", (int)$lot_number);
-        
+        $lot_number = sprintf("LOT-%03d", (int) $lot_number);
+
         // Check if lot number already exists for this auction
         $lots = $this->lotModel->getByAuctionId($auction_id);
         foreach ($lots as $lot) {
@@ -224,7 +224,7 @@ class LotController extends BaseController
     public function edit($id = null)
     {
         $this->ensureAdmin();
-        
+
 
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -289,10 +289,10 @@ class LotController extends BaseController
             $this->redirect(BASE_URL . 'lots/edit/' . $id);
             return;
         }
-        
+
         // Format lot number as LOT-XXX
-        $lot_number = sprintf("LOT-%03d", (int)$lot_number);
-        
+        $lot_number = sprintf("LOT-%03d", (int) $lot_number);
+
         // Check if lot number already exists for this auction (excluding current lot)
         $lots = $this->lotModel->getByAuctionId($auction_id);
         foreach ($lots as $existingLot) {
@@ -349,8 +349,8 @@ class LotController extends BaseController
                 $lotData['image_path'] = $target_file;
 
                 // Delete old image if exists
-                if (!empty($lot['image_path']) && file_exists($lot['image_path'])) {
-                    unlink($lot['image_path']);
+                if (!empty($lot['image_path'])) {
+                    $this->deleteLotImage($lot['image_path']);
                 }
             } else {
                 $this->setErrorMessage('Sorry, there was an error uploading your file');
@@ -372,6 +372,25 @@ class LotController extends BaseController
     }
 
     /**
+     * Delete lot image from server
+     * 
+     * @param string $image_path Path to the image file
+     * @return bool True if deletion was successful or file doesn't exist, false otherwise
+     */
+    private function deleteLotImage($image_path)
+    {
+        if (empty($image_path)) {
+            return true; // No image to delete
+        }
+        
+        if (file_exists($image_path)) {
+            return @unlink($image_path);
+        }
+        
+        return true; // File doesn't exist, so deletion successful
+    }
+    
+    /**
      * Admin: Delete lot
      */
     public function delete($id = null)
@@ -392,8 +411,9 @@ class LotController extends BaseController
 
         $auction_id = $lot['auction_id'];
 
-        if (!empty($lot['image_path']) && file_exists($lot['image_path'])) {
-            unlink($lot['image_path']);
+        // Delete lot image if exists
+        if (!empty($lot['image_path'])) {
+            $this->deleteLotImage($lot['image_path']);
         }
 
         $result = $this->lotModel->delete($id);
