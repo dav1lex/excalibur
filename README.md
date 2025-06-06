@@ -1,42 +1,30 @@
-# NanoBid
+# NanoBid - A smple Auction Platform
 
-A simple, clean auction platform for auction houses built with PHP, MySQL, and Bootstrap 5.
+This is a auction platform built with PHP. Users can register, login, and bid on items in auctions. Admins can manage users, auctions, and lots. The project is built with a simple structure, not over-engineered.
 
-## Setup Instructions
+## Featurs:
+*   User registration and login
+*   Email confirmation
+*   Password reset
+*   Admin dashboard for managin users and auctions
+*   Users can place bidsor proxy bids on lots
+*   Users have a watchlist
+*   auctions have different statuses (draft, upcoming, live, ended)
 
-1. **Database Setup**
-   - Create a new database named `auction_platform` in phpMyAdmin
-   - Import the `database.sql` file to create tables and initial admin user
-
-2. **Configuration**
-   - Update the `config/config.php` file with your database credentials if needed
-   - Adjust the `BASE_URL` constant to match your local environment
-
-3. **Web Server**
-   - Make sure you have PHP 8.0+ and MySQL running (XAMPP recommended)
-   - The project should be located in your XAMPP htdocs directory
-   - Access the site at: `http://localhost/` (or your configured URL)
+## Set up locally
+1.  Xampp.
+2.  create a mysql database and import `database.sql`.
+3.  copy files to htdocs folder.
+4.  configure database connection in `config/config.php`.
+5.  you need to configure `utils/EmailService.php` with your smtp details.
+6.  run `composer install` to get phpmailer.
+7.  enjoy.
 
 ## Default Admin Account
 
-- Email: admin@example.com
+- Email: admin@test.com
 - Password: admin123
 
-## Features Implemented
-
-### Phase 1: Foundation Setup
-- Basic MVC architecture
-- Database setup with tables for users, auctions, lots, bids, and watchlist
-- User authentication (login/register/logout)
-- Homepage with basic layout
-- Simple routing system
-
-### Phase 2: Authentication & Basic Admin
-- Admin dashboard with basic stats
-- User management (view list, edit, delete)
-- User dashboard for regular users
-- User profile management
-- Basic bid history and watchlist pages (UI only)
 
 ## Project Structure
 
@@ -60,15 +48,3 @@ A simple, clean auction platform for auction houses built with PHP, MySQL, and B
 ├── index.php         # Application entry point
 └── database.sql      # Database schema
 ```
-
-## Next Steps
-
-- Auction management functionality
-- Lot creation and management
-- Bidding system implementation
-- Watchlist functionality
-- Countdown timers for auctions
-
-## License
-
-This project is for educational purposes only. Not for commercial use. 
