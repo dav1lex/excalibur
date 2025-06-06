@@ -1,34 +1,28 @@
 <div class="row mb-4">
-    <div class="col-md-6">
-        <h1 class="display-5 mb-4 border-bottom pb-2">Add New Lot</h1>
-    </div>
-    <div class="col-md-6 text-end">
-        <a href="<?= BASE_URL ?>admin/lots?auction_id=<?= $auction['id'] ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Lots
-        </a>
-    </div>
-    
-    <div class="col-12">
-        <div class="container mt-3">
-            <?php if (isset($_SESSION['success_message'])): ?>
-                <div class="alert alert-success alert-dismissible fade show">
-                    <?= htmlspecialchars($_SESSION['success_message']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php unset($_SESSION['success_message']); ?>
-            <?php endif; ?>
-            
-            <?php if (isset($_SESSION['error_message'])): ?>
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <?= htmlspecialchars($_SESSION['error_message']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php unset($_SESSION['error_message']); ?>
-            <?php endif; ?>
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h1 class="display-5 mb-0">Add New Lot</h1>
+            <a href="<?= BASE_URL ?>admin/lots" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Lots
+            </a>
         </div>
-    </div>
-</div>
+        
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
 
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['error_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
+    </div>
 <div class="row">
     <div class="col-lg-8">
         <div class="card shadow-sm">

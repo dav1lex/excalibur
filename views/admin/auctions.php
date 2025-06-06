@@ -1,16 +1,32 @@
 <div class="row mb-4">
-    <div class="col-md-6">
-        <h1 class="display-5 mb-4 border-bottom pb-2">Manage Auctions</h1>
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h1 class="display-5 mb-0"> Manage Auctions</h1>
+            <a href="<?= BASE_URL ?>admin/dashboard" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i>
+                Back to Dashboard</a>
+        </div>
+        <div class="col-md-12 text-end">
+
+            <a href="<?= BASE_URL ?>auctions/create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create
+                New Auction</a>
+        </div>
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <?= htmlspecialchars($_SESSION['error_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
     </div>
-    <div class="col-md-6 text-end">
-        <a href="<?= BASE_URL ?>auctions/create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Create New Auction
-        </a>
-        <a href="<?= BASE_URL ?>admin/dashboard" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-    
+
     <div class="col-12">
         <div class="container mt-3">
             <?php if (isset($_SESSION['success_message'])): ?>
@@ -20,7 +36,7 @@
                 </div>
                 <?php unset($_SESSION['success_message']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['error_message'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show">
                     <?= htmlspecialchars($_SESSION['error_message']) ?>
@@ -70,11 +86,11 @@
                                         <td><?= $auction['id'] ?></td>
                                         <td><?= htmlspecialchars($auction['title']) ?></td>
                                         <td>
-                                            <?php 
+                                            <?php
                                             $badgeClass = '';
                                             $badgeText = ucfirst($auction['status']);
-                                            
-                                            switch($auction['status']) {
+
+                                            switch ($auction['status']) {
                                                 case 'draft':
                                                     $badgeClass = 'bg-secondary';
                                                     break;
@@ -103,16 +119,20 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>" class="btn btn-info" title="View">
+                                                <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>" class="btn btn-info"
+                                                    title="View">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a href="<?= BASE_URL ?>auctions/edit/<?= $auction['id'] ?>" class="btn btn-primary" title="Edit">
+                                                <a href="<?= BASE_URL ?>auctions/edit/<?= $auction['id'] ?>"
+                                                    class="btn btn-primary" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
-                                                <a href="<?= BASE_URL ?>lots/create?auction_id=<?= $auction['id'] ?>" class="btn btn-success" title="Add Lot">
+                                                <a href="<?= BASE_URL ?>lots/create?auction_id=<?= $auction['id'] ?>"
+                                                    class="btn btn-success" title="Add Lot">
                                                     <i class="bi bi-plus-circle"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>" title="Delete">
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>" title="Delete">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
@@ -120,19 +140,26 @@
                                     </tr>
 
                                     <!-- Delete Auction Modal -->
-                                    <div class="modal fade" id="deleteAuctionModal<?= $auction['id'] ?>" tabindex="-1" aria-labelledby="deleteAuctionModalLabel<?= $auction['id'] ?>" aria-hidden="true">
+                                    <div class="modal fade" id="deleteAuctionModal<?= $auction['id'] ?>" tabindex="-1"
+                                        aria-labelledby="deleteAuctionModalLabel<?= $auction['id'] ?>" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteAuctionModalLabel<?= $auction['id'] ?>">Confirm Delete</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    <h5 class="modal-title" id="deleteAuctionModalLabel<?= $auction['id'] ?>">
+                                                        Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Are you sure you want to delete the auction "<?= htmlspecialchars($auction['title']) ?>"? This action cannot be undone. Lots associated with this auction will also be deleted.
+                                                    Are you sure you want to delete the auction
+                                                    "<?= htmlspecialchars($auction['title']) ?>"? This action cannot be undone.
+                                                    Lots associated with this auction will also be deleted.
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <a href="<?= BASE_URL ?>auctions/delete/<?= $auction['id'] ?>" class="btn btn-danger">Delete Auction</a>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="<?= BASE_URL ?>auctions/delete/<?= $auction['id'] ?>"
+                                                        class="btn btn-danger">Delete Auction</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -145,4 +172,4 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
