@@ -542,4 +542,49 @@ class Bid extends BaseModel {
         $result = $stmt->fetchColumn();
         return $result ? $result : 0; // Return 0 if no won items
     }
+    
+    /**
+     * Get the current highest bid for a lot with complete user information
+     * 
+     * @param int $lot_id The lot ID
+     * @return array|bool The current highest bid with user information or false if none
+     */
+    public function getCurrentHighestBid($lot_id) {
+        $sql = "SELECT b.*, u.id as user_id, u.email, u.name
+                FROM bids b
+                JOIN users u ON b.user_id = u.id
+                WHERE b.lot_id = :lot_id
+                ORDER BY b.amount DESC
+                LIMIT 1";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Get the winning bid for a lot (highest bid on an ended auction)
+     * 
+     * @param int $lot_id The lot ID
+     * @return array|bool The winning bid or false if none
+     */
+    public function getWinningBid($lot_id) {
+        $sql = "SELECT b.*, u.id as user_id, u.email, u.name
+                FROM bids b
+                JOIN users u ON b.user_id = u.id
+                JOIN lots l ON b.lot_id = l.id
+                JOIN auctions a ON l.auction_id = a.id
+                WHERE b.lot_id = :lot_id
+                AND a.status = 'ended'
+                AND b.amount = l.current_price
+                LIMIT 1";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 } 

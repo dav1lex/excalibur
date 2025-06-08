@@ -5,6 +5,7 @@ require_once 'models/Lot.php';
 require_once 'models/Auction.php';
 require_once 'models/User.php';
 require_once 'models/Watchlist.php';
+require_once 'utils/EmailService.php';
 
 class BidController extends BaseController
 {
@@ -13,6 +14,7 @@ class BidController extends BaseController
     private $auctionModel;
     private $userModel;
     private $watchlistModel;
+    private $emailService;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class BidController extends BaseController
         $this->auctionModel = new Auction();
         $this->userModel = new User();
         $this->watchlistModel = new Watchlist();
+        $this->emailService = new EmailService();
     }
 
     /**
@@ -62,6 +65,14 @@ class BidController extends BaseController
             return;
         }
 
+        // Get current highest bidder information before placing new bid
+        $currentHighestBid = $this->bidModel->getCurrentHighestBid($lot_id);
+        $outbidUserId = null;
+        
+        if ($currentHighestBid) {
+            $outbidUserId = $currentHighestBid['user_id'];
+        }
+
         // Calculate minimum bid amount
         $minimumBid = $this->bidModel->getNextMinimumBid($lot['current_price']);
         
@@ -99,6 +110,20 @@ class BidController extends BaseController
         if ($bidId) {
             // Process proxy bidding
             $proxyResult = $this->bidModel->processProxyBidding($lot_id, 0);
+            
+            // Send outbid notification to the previous highest bidder if exists
+            if ($outbidUserId && $outbidUserId != $_SESSION['user_id']) {
+                $outbidUser = $this->userModel->getById($outbidUserId);
+                if ($outbidUser) {
+                    $this->emailService->sendOutbidNotification(
+                        $outbidUser['email'],
+                        $outbidUser['first_name'] . ' ' . $outbidUser['last_name'],
+                        $lot['title'],
+                        $lot_id
+                    );
+                    error_log("Outbid notification sent to user: {$outbidUser['email']} for lot: {$lot['title']}");
+                }
+            }
             
             if ($proxyResult) {
                 if ($max_amount !== null) {
@@ -269,5 +294,59 @@ class BidController extends BaseController
             'user' => $this->getCurrentUser(),
             'watchlist' => $watchlist
         ]);
+    }
+
+    /**
+     * Send winning notifications when an auction ends
+     * This method should be called by a cron job or when an auction is closed manually
+     * 
+     * @param int $auction_id The auction ID
+     * @param bool $shouldRedirect Whether to redirect after sending notifications (default: true)
+     * @return bool True if notifications were sent successfully
+     */
+    public function sendWinningNotifications($auction_id, $shouldRedirect = true)
+    {
+        // Check if user is admin or has appropriate permissions
+        if (!$this->isAdmin()) {
+            $this->setErrorMessage('You do not have permission to perform this action.');
+            if ($shouldRedirect) {
+                $this->redirect(BASE_URL);
+            }
+            return false;
+        }
+        
+        // Get all lots in the auction
+        $lots = $this->lotModel->getByAuctionId($auction_id);
+        
+        foreach ($lots as $lot) {
+            // Get the winning bid for each lot
+            $winningBid = $this->bidModel->getWinningBid($lot['id']);
+            
+            if ($winningBid) {
+                // Get the winning user's details
+                $winner = $this->userModel->getById($winningBid['user_id']);
+                
+                if ($winner) {
+                    // Send winning notification
+                    $this->emailService->sendWinningNotification(
+                        $winner['email'],
+                        $winner['name'],
+                        $lot['title'],
+                        $lot['id'],
+                        $winningBid['amount']
+                    );
+                    
+                    error_log("Winning notification sent to user: {$winner['email']} for lot: {$lot['title']}");
+                }
+            }
+        }
+        
+        $this->setSuccessMessage('Winning notifications sent successfully.');
+        
+        if ($shouldRedirect) {
+            $this->redirect(BASE_URL . 'auctions/edit/' . $auction_id);
+        }
+        
+        return true;
     }
 }

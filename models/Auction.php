@@ -182,29 +182,55 @@ class Auction extends BaseModel {
         return $stmt->fetchColumn();
     }
     
-    /**
-     * Update auction statuses based on current time
-     * This should be called regularly via cron or at application start
-     * Note: This will NEVER change 'draft' status auctions - those must be changed manually
-     */
-    public function updateStatuses() {
-        $now = date('Y-m-d H:i:s');
+    public function updateStatuses()
+    {
+        // --- Handle Live to Ended transition and send notifications ---
         
-        // Update 'upcoming' auctions to 'live' when start date is reached
-        $sql = "UPDATE auctions SET status = 'live', updated_at = NOW() 
-                WHERE status = 'upcoming' 
-                AND start_date <= ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(1, $now);
-        $stmt->execute();
+        // 1. Find live auctions that should now be ended.
+        $sqlLiveEnded = "SELECT id FROM auctions WHERE status = 'live' AND end_date <= NOW()";
+        $stmtLiveEnded = $this->conn->prepare($sqlLiveEnded);
+        $stmtLiveEnded->execute();
+        $auctionsToEnd = $stmtLiveEnded->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!empty($auctionsToEnd)) {
+            // This needs the BidController to send notifications.
+            // We require it here to avoid circular dependencies if it were in the constructor.
+            require_once 'controllers/BidController.php';
+            $bidController = new BidController();
+            
+            foreach ($auctionsToEnd as $auctionId) {
+                try {
+                    $this->conn->beginTransaction();
+
+                    // 2. Update status for this specific auction.
+                    // We add a `status = 'live'` check to prevent race conditions.
+                    $sqlUpdate = "UPDATE auctions SET status = 'ended', updated_at = NOW() WHERE id = :id AND status = 'live'";
+                    $stmtUpdate = $this->conn->prepare($sqlUpdate);
+                    $stmtUpdate->bindParam(':id', $auctionId, PDO::PARAM_INT);
+                    $updated = $stmtUpdate->execute();
+                    
+                    // Only send notifications if the update was successful.
+                    if($updated) {
+                        // 3. Send notifications
+                        $bidController->sendWinningNotifications($auctionId, false);
+                        error_log("Auction #$auctionId ended automatically, winning notifications sent.");
+                    }
+
+                    $this->conn->commit();
+                } catch (Exception $e) {
+                    $this->conn->rollBack();
+                    error_log("Error ending auction #$auctionId automatically: " . $e->getMessage());
+                }
+            }
+        }
         
-        // Update 'live' auctions to 'ended' when end date is passed
-        $sql = "UPDATE auctions SET status = 'ended', updated_at = NOW() 
-                WHERE status = 'live'
-                AND end_date < ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(1, $now);
-        $stmt->execute();
+        // --- Handle Upcoming to Live transition ---
+        
+        // This can be a simple update as it doesn't trigger notifications.
+        $sqlUpcomingLive = "UPDATE auctions SET status = 'live', updated_at = NOW() 
+                            WHERE status = 'upcoming' AND start_date <= NOW() AND end_date > NOW()";
+        $stmtUpcomingLive = $this->conn->prepare($sqlUpcomingLive);
+        $stmtUpcomingLive->execute();
         
         return true;
     }

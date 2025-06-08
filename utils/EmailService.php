@@ -122,4 +122,99 @@ class EmailService {
             return false;
         }
     }
+    
+    public function sendOutbidNotification($email, $name, $lotTitle, $lotId) {
+        try {
+            // Recipients
+            $this->mailer->addAddress($email, $name);
+            
+            // Content
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'You have been outbid on ' . $lotTitle;
+            
+            $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
+            
+            $this->mailer->Body = '
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>You\'ve Been Outbid!</h2>
+                        <p>Hello ' . htmlspecialchars($name) . ',</p>
+                        <p>Someone has placed a higher bid on item <strong>' . htmlspecialchars($lotTitle) . '</strong> that you were bidding on.</p>
+                        <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
+                        <p>Don\'t miss out! Place a new bid now to stay in the game.</p>
+                        <p>Regards,<br>The NanoBid Team</p>
+                    </div>
+                </body>
+                </html>
+            ';
+            
+            $this->mailer->AltBody = 'Hello ' . $name . ', 
+                Someone has placed a higher bid on item "' . $lotTitle . '" that you were bidding on.
+                You can view the item and place a new bid here: ' . $lotUrl . '
+                Don\'t miss out!
+                Regards,
+                The NanoBid Team';
+            
+            return $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            return false;
+        }
+    }
+    
+    public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount) {
+        try {
+            // Recipients
+            $this->mailer->addAddress($email, $name);
+            
+            // Content
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = 'Congratulations! You won ' . $lotTitle;
+            
+            $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
+            
+            $this->mailer->Body = '
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Congratulations!</h2>
+                        <p>Hello ' . htmlspecialchars($name) . ',</p>
+                        <p>You are the winning bidder for <strong>' . htmlspecialchars($lotTitle) . '</strong> with a bid of ' . htmlspecialchars($winningAmount) . '€.</p>
+                        <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
+                        <p>Our team will be in contact shortly with payment and shipping details.</p>
+                        <p>Thank you for participating in our auction!</p>
+                        <p>Regards,<br>The NanoBid Team</p>
+                    </div>
+                </body>
+                </html>
+            ';
+            
+            $this->mailer->AltBody = 'Hello ' . $name . ', 
+                Congratulations! You are the winning bidder for "' . $lotTitle . '" with a bid of ' . $winningAmount . '€.
+                You can view the item details here: ' . $lotUrl . '
+                Thank you for participating in our auction!
+                Regards,
+                The NanoBid Team';
+            
+            return $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            return false;
+        }
+    }
 } 

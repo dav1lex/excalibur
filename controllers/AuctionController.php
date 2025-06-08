@@ -444,4 +444,49 @@ class AuctionController extends BaseController
       
         $this->redirect(BASE_URL . 'admin/auctions');
     }
+
+    /**
+     * Admin: End auction and send winning notifications
+     */
+    public function endAuction($id = null)
+    {
+        // Check if user is admin
+        $this->ensureAdmin();
+
+        if (!$id) {
+            $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        }
+
+        $auction = $this->auctionModel->getById($id);
+        if (!$auction) {
+            $this->setErrorMessage('Auction not found');
+            $this->redirect(BASE_URL . 'admin/auctions');
+            return;
+        }
+
+        // Can only end live auctions
+        if ($auction['status'] !== 'live') {
+            $this->setErrorMessage('Only live auctions can be ended manually.');
+            $this->redirect(BASE_URL . 'admin/auctions');
+            return;
+        }
+
+        // Update auction status to ended
+        $result = $this->auctionModel->update($id, [
+            'status' => 'ended'
+        ]);
+
+        if ($result) {
+            // Get BidController to send winning notifications
+            require_once 'controllers/BidController.php';
+            $bidController = new BidController();
+            $bidController->sendWinningNotifications($id, true);
+            
+            $this->setSuccessMessage('Auction ended successfully and winning notifications sent.');
+        } else {
+            $this->setErrorMessage('Error ending auction');
+        }
+
+        $this->redirect(BASE_URL . 'admin/auctions');
+    }
 }

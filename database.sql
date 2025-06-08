@@ -84,6 +84,5 @@ CREATE TABLE IF NOT EXISTS watchlist (
 );
 
 -- Insert default admin user
-INSERT INTO users (name, email, password, role, is_confirmed) VALUES 
-('Admin', 'admin@example.com', '$2y$10$JmZnVSH5jJ2WO7x9sK09Quk/tM5LOnGqQbP9EFcME7.ZM6gECYzMa', 'admin', 1);
--- Password: admin123 
+-- INSERT INTO users (name, email, password, role, is_confirmed) VALUES 
+-- ('Admin', 'admin@example.com', 'RUN-THE-HASH-THEN-PASTE-HERE', 'admin', 1);

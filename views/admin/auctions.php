@@ -131,6 +131,12 @@
                                                     class="btn btn-success" title="Add Lot">
                                                     <i class="bi bi-plus-circle"></i>
                                                 </a>
+                                                <?php if ($auction['status'] === 'live'): ?>
+                                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#endAuctionModal<?= $auction['id'] ?>" title="End Auction">
+                                                    <i class="bi bi-flag-fill"></i>
+                                                </button>
+                                                <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
                                                     data-bs-target="#deleteAuctionModal<?= $auction['id'] ?>" title="Delete">
                                                     <i class="bi bi-trash"></i>
@@ -164,6 +170,38 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- End Auction Modal -->
+                                    <?php if ($auction['status'] === 'live'): ?>
+                                    <div class="modal fade" id="endAuctionModal<?= $auction['id'] ?>" tabindex="-1"
+                                        aria-labelledby="endAuctionModalLabel<?= $auction['id'] ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="endAuctionModalLabel<?= $auction['id'] ?>">
+                                                        End Auction</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to end the auction
+                                                    "<?= htmlspecialchars($auction['title']) ?>"? This will:
+                                                    <ul>
+                                                        <li>Mark the auction as ended</li>
+                                                        <li>Send winning notifications to all winning bidders</li>
+                                                        <li>Prevent further bidding on all lots</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="<?= BASE_URL ?>auctions/end/<?= $auction['id'] ?>"
+                                                        class="btn btn-warning">End Auction</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>

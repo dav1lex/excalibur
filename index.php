@@ -75,6 +75,7 @@ $router->post('/auctions/store', [AuctionController::class, 'store']);
 $router->get('/auctions/edit/:id', [AuctionController::class, 'edit']);
 $router->post('/auctions/update/:id', [AuctionController::class, 'update']);
 $router->get('/auctions/delete/:id', [AuctionController::class, 'delete']);
+$router->get('/auctions/end/:id', [AuctionController::class, 'endAuction']);
 $router->get('/auctions/:auction_id/lots/:lot_id', [AuctionController::class, 'view']);
 $router->get('/auctions/:id', [AuctionController::class, 'view']);
 
