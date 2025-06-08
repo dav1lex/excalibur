@@ -4,36 +4,39 @@ require_once 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class EmailService {
+class EmailService
+{
     private $mailer;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->mailer = new PHPMailer(true);
-        
-      // Server settings
-      $this->mailer->isSMTP();
-      $this->mailer->Host = 'smtp.titancode.pl'; //  SMTP server
-      $this->mailer->SMTPAuth = true;
-      $this->mailer->Username = 'ougur'; //  email
-      $this->mailer->Password = 'Davilex12345.'; //  email password
-      $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-      $this->mailer->Port = 587;
-      
-      // Sender
-      $this->mailer->setFrom('info@titancode.pl', 'NanoBid');
+
+        // Server settings
+        $this->mailer->isSMTP();
+        $this->mailer->Host = 'smtp.titancode.pl'; //  SMTP server
+        $this->mailer->SMTPAuth = true;
+        $this->mailer->Username = 'ougur'; //  email
+        $this->mailer->Password = 'Davilex12345.'; //  email password
+        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $this->mailer->Port = 587;
+
+        // Sender
+        $this->mailer->setFrom('info@titancode.pl', 'NanoBid');
     }
-    
-    public function sendConfirmationEmail($email, $name, $token) {
+
+    public function sendConfirmationEmail($email, $name, $token)
+    {
         try {
             // Recipients
             $this->mailer->addAddress($email, $name);
-            
+
             // Content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Confirm Your Email Address';
-            
+
             $confirmUrl = BASE_URL . 'confirm-email?token=' . $token;
-            
+
             $this->mailer->Body = '
                 <html>
                 <head>
@@ -58,14 +61,14 @@ class EmailService {
                 </body>
                 </html>
             ';
-            
+
             $this->mailer->AltBody = 'Hello ' . $name . ', 
                 Thank you for registering. Please confirm your email address by clicking this link: ' . $confirmUrl . '
                 This link will expire in 24 hours.
                 If you did not create an account, no further action is required.
                 Regards,
                 The NanoBid Team';
-            
+
             return $this->mailer->send();
         } catch (Exception $e) {
             error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}"); //Remove in production
@@ -73,17 +76,18 @@ class EmailService {
         }
     }
 
-    public function sendPasswordResetEmail($email, $name, $token) {
+    public function sendPasswordResetEmail($email, $name, $token)
+    {
         try {
             // Recipients
             $this->mailer->addAddress($email, $name);
-            
+
             // Content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Reset Your Password';
-            
+
             $resetUrl = BASE_URL . 'reset-password?token=' . $token;
-            
+
             $this->mailer->Body = '
                 <html>
                 <head>
@@ -108,32 +112,33 @@ class EmailService {
                 </body>
                 </html>
             ';
-            
+
             $this->mailer->AltBody = 'Hello ' . $name . ', 
                 You requested to reset your password. Please click this link to reset it: ' . $resetUrl . '
                 This link will expire in 24 hours.
                 If you did not request a password reset, please ignore this email.
                 Regards,
                 The NanoBid Team';
-            
+
             return $this->mailer->send();
         } catch (Exception $e) {
             error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}"); //Remove in production
             return false;
         }
     }
-    
-    public function sendOutbidNotification($email, $name, $lotTitle, $lotId) {
+
+    public function sendOutbidNotification($email, $name, $lotTitle, $lotId)
+    {
         try {
             // Recipients
             $this->mailer->addAddress($email, $name);
-            
+
             // Content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'You have been outbid on ' . $lotTitle;
-            
+
             $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
-            
+
             $this->mailer->Body = '
                 <html>
                 <head>
@@ -155,32 +160,33 @@ class EmailService {
                 </body>
                 </html>
             ';
-            
+
             $this->mailer->AltBody = 'Hello ' . $name . ', 
                 Someone has placed a higher bid on item "' . $lotTitle . '" that you were bidding on.
                 You can view the item and place a new bid here: ' . $lotUrl . '
                 Don\'t miss out!
                 Regards,
                 The NanoBid Team';
-            
+
             return $this->mailer->send();
         } catch (Exception $e) {
             error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
             return false;
         }
     }
-    
-    public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount) {
+
+    public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount)
+    {
         try {
             // Recipients
             $this->mailer->addAddress($email, $name);
-            
+
             // Content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Congratulations! You won ' . $lotTitle;
-            
+
             $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
-            
+
             $this->mailer->Body = '
                 <html>
                 <head>
@@ -203,18 +209,18 @@ class EmailService {
                 </body>
                 </html>
             ';
-            
+
             $this->mailer->AltBody = 'Hello ' . $name . ', 
                 Congratulations! You are the winning bidder for "' . $lotTitle . '" with a bid of ' . $winningAmount . '€.
                 You can view the item details here: ' . $lotUrl . '
                 Thank you for participating in our auction!
                 Regards,
                 The NanoBid Team';
-            
+
             return $this->mailer->send();
         } catch (Exception $e) {
             error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
             return false;
         }
     }
-} 
+}

@@ -150,25 +150,6 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Admin: Auction management dashboard
-     */
-    public function manage()
-    {
-        // Check if user is admin
-        if (!$this->isAdmin()) {
-            $this->setErrorMessage('Access denied. Admin privileges required.');
-            $this->redirect(BASE_URL);
-            return;
-        }
-
-        $auctions = $this->auctionModel->getAll();
-
-        $this->render('admin/auctions', [
-            'title' => 'Manage Auctions - ' . SITE_NAME,
-            'user' => $this->getCurrentUser(),
-            'auctions' => $auctions
-        ]);
-    }
 
     /**
      * Admin: Create auction form
@@ -402,11 +383,11 @@ class AuctionController extends BaseController
         if (empty($image_path)) {
             return true; // No image to delete
         }
-        
+
         if (file_exists($image_path)) {
             return @unlink($image_path);
         }
-        
+
         return true; // File doesn't exist, so consider deletion successful
     }
 
@@ -441,7 +422,7 @@ class AuctionController extends BaseController
         } else {
             $this->setErrorMessage('Error deleting auction');
         }
-      
+
         $this->redirect(BASE_URL . 'admin/auctions');
     }
 
@@ -481,7 +462,7 @@ class AuctionController extends BaseController
             require_once 'controllers/BidController.php';
             $bidController = new BidController();
             $bidController->sendWinningNotifications($id, true);
-            
+
             $this->setSuccessMessage('Auction ended successfully and winning notifications sent.');
         } else {
             $this->setErrorMessage('Error ending auction');

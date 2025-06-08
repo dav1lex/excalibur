@@ -30,20 +30,20 @@ class AdminController extends BaseController
             'totalLots' => $this->lotModel->countTotal(),
             'totalBids' => $this->bidModel->countTotal() ?? 0
         ];
-        
+
         // Get all auctions 
         $auctions = $this->auctionModel->getAll();
-        
+
         // Check if is selected
         $auctionTotal = null;
         $selectedAuction = null;
-        
+
         if (isset($_GET['auction_id']) && !empty($_GET['auction_id'])) {
-            $auction_id = (int)$_GET['auction_id'];
-            
+            $auction_id = (int) $_GET['auction_id'];
+
             // Get
             $selectedAuction = $this->auctionModel->getById($auction_id);
-            
+
             if ($selectedAuction) {
                 // Calculate from method
                 $auctionTotal = $this->lotModel->calculateAuctionTotal($auction_id);
@@ -64,7 +64,7 @@ class AdminController extends BaseController
     {
         $this->ensureAdmin();
         $role = isset($_GET['role']) ? $_GET['role'] : null;
-        
+
         // Get users based on role filter
         if ($role && in_array($role, ['admin', 'user'])) {
             $users = $this->userModel->getByRole($role);
@@ -170,12 +170,12 @@ class AdminController extends BaseController
     public function lots()
     {
         $this->ensureAdmin();
-        // Get auction filter if provided
         $auction_id = isset($_GET['auction_id']) ? (int) $_GET['auction_id'] : null;
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
         // Get all auctions for the dropdown
         $auctions = $this->auctionModel->getAll();
+        $current_auction = null;
 
         // Get lots based on filters
         if (!empty($search)) {
@@ -184,9 +184,10 @@ class AdminController extends BaseController
         } else if ($auction_id) {
             // If only auction filter is provided
             $lots = $this->lotModel->getByAuctionId($auction_id);
+            $current_auction = $this->auctionModel->getById($auction_id);
         } else {
             // No filters, get all lots
-            $lots = $this->lotModel->getAll();
+            $lots = $this->lotModel->getAllWithAuctionTitle();
         }
 
         $this->render('admin/lots', [
@@ -194,6 +195,7 @@ class AdminController extends BaseController
             'user' => $this->getCurrentUser(),
             'lots' => $lots,
             'auctions' => $auctions,
+            'current_auction' => $current_auction,
             'current_auction_id' => $auction_id,
             'search' => $search
         ]);
@@ -202,32 +204,31 @@ class AdminController extends BaseController
     public function viewLot($id = null)
     {
         $this->ensureAdmin();
-        
+
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
         }
-        
+
         $lot = $this->lotModel->getById($id);
-        
+
         if (!$lot) {
             $this->setErrorMessage('Lot not found');
             $this->redirect(BASE_URL . 'admin/lots');
             return;
         }
-        
+
         // Get auction info
         $auction = $this->auctionModel->getById($lot['auction_id']);
-        
+
         // Get bid history
-        $bidModel = new Bid();
-        $bids = $bidModel->getByLotId($id);
-        
+        $bids = $this->bidModel->getByLotId($id);
+
         // Determine winner (highest bidder if auction has ended)
         $winner = null;
         if ($auction['status'] === 'ended' && !empty($bids)) {
             $winner = $bids[0]; // Bids are ordered by amount DESC
         }
-        
+
         $this->render('admin/view_lot', [
             'title' => 'View Lot: ' . $lot['title'] . ' - ' . SITE_NAME,
             'user' => $this->getCurrentUser(),

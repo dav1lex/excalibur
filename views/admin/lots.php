@@ -61,7 +61,13 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">All Lots</h5>
+                    <h5 class="mb-0">
+                        <?php if ($current_auction): ?>
+                            Lots in "<?= htmlspecialchars($current_auction['title']) ?>"
+                        <?php else: ?>
+                            All Lots
+                        <?php endif; ?>
+                    </h5>
                     <div>
                         <?php if (isset($auctions) && !empty($auctions)): ?>
                             <div class="dropdown">
@@ -91,7 +97,10 @@
                                 <tr>
                                     <th>Image</th>
                                     <th>Lot #</th>
+                                    <th>Title</th>
+                                    <?php if (!$current_auction): ?>
                                     <th>Auction</th>
+                                    <?php endif; ?>
                                     <th>Description</th>
                                     <th>Starting Price</th>
                                     <th>Current Price</th>
@@ -116,7 +125,10 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td><span class="fw-bold"><?= htmlspecialchars($lot['lot_number']) ?></span></td>
+                                            <td><?= htmlspecialchars($lot['title']) ?></td>
+                                            <?php if (!$current_auction): ?>
                                             <td><?= htmlspecialchars($lot['auction_title']) ?></td>
+                                            <?php endif; ?>
                                             <td title="<?= htmlspecialchars($lot['description']) ?>">
                                                 <?= htmlspecialchars(strlen($lot['description']) > 25 ? substr($lot['description'], 0, 20) . '...' : $lot['description']) ?>
                                             </td>

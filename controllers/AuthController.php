@@ -233,7 +233,7 @@ class AuthController extends BaseController
             'title' => 'Forgot Password - ' . SITE_NAME
         ]);
     }
-    
+
     public function forgotPasswordPost()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -266,7 +266,7 @@ class AuthController extends BaseController
         } else {
             $this->setErrorMessage('Error sending password reset email. Please try again later.');
         }
-        
+
         $this->redirect(BASE_URL . 'login');
     }
 
@@ -327,7 +327,7 @@ class AuthController extends BaseController
             $this->redirect(BASE_URL . 'reset-password?token=' . urlencode($token));
         }
     }
-    
+
     // Helper method to redirect users to their appropriate dashboard
     private function redirectToDashboard()
     {
@@ -337,4 +337,4 @@ class AuthController extends BaseController
             $this->redirect(BASE_URL . 'user/dashboard');
         }
     }
-}
+}       

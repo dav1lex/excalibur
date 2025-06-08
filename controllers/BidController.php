@@ -68,14 +68,14 @@ class BidController extends BaseController
         // Get current highest bidder information before placing new bid
         $currentHighestBid = $this->bidModel->getCurrentHighestBid($lot_id);
         $outbidUserId = null;
-        
+
         if ($currentHighestBid) {
             $outbidUserId = $currentHighestBid['user_id'];
         }
 
         // Calculate minimum bid amount
         $minimumBid = $this->bidModel->getNextMinimumBid($lot['current_price']);
-        
+
         // Validate bid amount
         if ($bid_amount < $minimumBid) {
             $this->setErrorMessage('Your bid must be at least ' . $minimumBid . '€. The bid increment for this price range is ' . $this->bidModel->getBidIncrement($lot['current_price']) . '€.');
@@ -90,7 +90,7 @@ class BidController extends BaseController
                 $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
                 return;
             }
-            
+
             // Log for debugging
             error_log("User {$_SESSION['user_id']} placed a bid with amount: $bid_amount and max_amount: $max_amount on lot: $lot_id");
         } else {
@@ -110,7 +110,7 @@ class BidController extends BaseController
         if ($bidId) {
             // Process proxy bidding
             $proxyResult = $this->bidModel->processProxyBidding($lot_id, 0);
-            
+
             // Send outbid notification to the previous highest bidder if exists
             if ($outbidUserId && $outbidUserId != $_SESSION['user_id']) {
                 $outbidUser = $this->userModel->getById($outbidUserId);
@@ -124,7 +124,7 @@ class BidController extends BaseController
                     error_log("Outbid notification sent to user: {$outbidUser['email']} for lot: {$lot['title']}");
                 }
             }
-            
+
             if ($proxyResult) {
                 if ($max_amount !== null) {
                     $this->setSuccessMessage('Your bid has been placed successfully with a maximum amount of ' . $max_amount . '€. The system will automatically bid on your behalf up to this amount.');
@@ -139,30 +139,6 @@ class BidController extends BaseController
         }
 
         $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
-    }
-
-    /**
-     * View user's bids
-     */
-    public function myBids()
-    {
-        // Check if user is logged in
-        if (!$this->isLoggedIn()) {
-            $this->setErrorMessage('You must be logged in to view your bids.');
-            $this->redirect(BASE_URL . 'login');
-            return;
-        }
-
-        $user_id = $_SESSION['user_id'];
-        $bids = $this->bidModel->getByUserId($user_id);
-        $winningBids = $this->bidModel->getUserWinningBids($user_id);
-
-        $this->render('user/my_bids', [
-            'title' => 'My Bids - ' . SITE_NAME,
-            'user' => $this->getCurrentUser(),
-            'bids' => $bids,
-            'winningBids' => $winningBids
-        ]);
     }
 
     /**
@@ -182,13 +158,13 @@ class BidController extends BaseController
         }
 
         if (!$lot_id && isset($_POST['lot_id'])) {
-            $lot_id = (int)$_POST['lot_id'];
+            $lot_id = (int) $_POST['lot_id'];
         }
-        $lot_id = (int)$lot_id;
+        $lot_id = (int) $lot_id;
 
         if (!$lot_id) {
             $this->setErrorMessage('Lot ID is required.');
-            $this->redirectBack(); 
+            $this->redirectBack();
             return;
         }
 
@@ -228,19 +204,19 @@ class BidController extends BaseController
         // Ensure POST 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->setErrorMessage('Invalid request method.');
-            $this->redirectBack(); 
+            $this->redirectBack();
             return;
         }
 
         // Get lot_id from parameter (from route)
-        $lot_id = (int)$lot_id;
+        $lot_id = (int) $lot_id;
 
         if (!$lot_id) {
             $this->setErrorMessage('Lot ID is required.');
             $this->redirectBack();
             return;
         }
-        
+
         // Fetch lot details to get auction_id for redirect, and to ensure lot exists
         $lot = $this->lotModel->getById($lot_id);
         if (!$lot) {
@@ -314,18 +290,18 @@ class BidController extends BaseController
             }
             return false;
         }
-        
+
         // Get all lots in the auction
         $lots = $this->lotModel->getByAuctionId($auction_id);
-        
+
         foreach ($lots as $lot) {
             // Get the winning bid for each lot
             $winningBid = $this->bidModel->getWinningBid($lot['id']);
-            
+
             if ($winningBid) {
                 // Get the winning user's details
                 $winner = $this->userModel->getById($winningBid['user_id']);
-                
+
                 if ($winner) {
                     // Send winning notification
                     $this->emailService->sendWinningNotification(
@@ -335,18 +311,18 @@ class BidController extends BaseController
                         $lot['id'],
                         $winningBid['amount']
                     );
-                    
+
                     error_log("Winning notification sent to user: {$winner['email']} for lot: {$lot['title']}");
                 }
             }
         }
-        
+
         $this->setSuccessMessage('Winning notifications sent successfully.');
-        
+
         if ($shouldRedirect) {
             $this->redirect(BASE_URL . 'auctions/edit/' . $auction_id);
         }
-        
+
         return true;
     }
-}
+}   

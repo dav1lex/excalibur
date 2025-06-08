@@ -81,21 +81,6 @@ class UserController extends BaseController
         ]);
     }
 
-    public function watchlist()
-    {
-        // Check if user is logged in
-        if (!$this->isLoggedIn()) {
-            $this->setErrorMessage('Please login to view your watchlist.');
-            $this->redirect(BASE_URL . 'login');
-            return;
-        }
-
-        $this->render('user/watchlist', [
-            'title' => 'My Watchlist - ' . SITE_NAME,
-            'user' => $this->getCurrentUser(),
-            'watchlist' => [] // Will implement in next phase
-        ]);
-    }
 
     public function profile()
     {

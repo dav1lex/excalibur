@@ -157,18 +157,6 @@ class Lot extends BaseModel
         return $stmt->execute();
     }
 
-    /**
-     * Update the current price of a lot
-     */
-    public function updateCurrentPrice($id, $price)
-    {
-        $sql = "UPDATE lots SET current_price = :price, updated_at = NOW() WHERE id = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':price', $price, PDO::PARAM_INT);
-
-        return $stmt->execute();
-    }
 
     /**
      * Count total lots
@@ -259,5 +247,30 @@ class Lot extends BaseModel
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'] ?? 0;
+    }
+
+    /**
+     * Get all lots with their auction titles
+     */
+    public function getAllWithAuctionTitle($limit = null, $offset = 0)
+    {
+        $sql = "SELECT l.*, a.title as auction_title 
+                FROM lots l
+                JOIN auctions a ON l.auction_id = a.id
+                ORDER BY l.created_at DESC";
+
+        if ($limit !== null) {
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+
+        $stmt = $this->conn->prepare($sql);
+
+        if ($limit !== null) {
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
