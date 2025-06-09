@@ -3,6 +3,10 @@ require_once 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
 
 class EmailService
 {
@@ -11,18 +15,20 @@ class EmailService
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
-
-        // Server settings
+        
         $this->mailer->isSMTP();
-        $this->mailer->Host = 'smtp.titancode.pl'; //  SMTP server
+        $this->mailer->Host = $_ENV['SMTP_HOST']; //  SMTP 
         $this->mailer->SMTPAuth = true;
-        $this->mailer->Username = 'ougur'; //  email
-        $this->mailer->Password = 'Davilex12345.'; //  email password
+        $this->mailer->Username = $_ENV['SMTP_USERNAME']; //  email
+        $this->mailer->Password = $_ENV['SMTP_PASSWORD']; 
         $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mailer->Port = 587;
+        $this->mailer->Port = $_ENV['SMTP_PORT'];
 
         // Sender
-        $this->mailer->setFrom('info@titancode.pl', 'NanoBid');
+        $this->mailer->setFrom(
+            $_ENV['SMTP_FROM_EMAIL'], 
+            $_ENV['SMTP_FROM_NAME']
+        );
     }
 
     public function sendConfirmationEmail($email, $name, $token)
@@ -71,7 +77,7 @@ class EmailService
 
             return $this->mailer->send();
         } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}"); //Remove in production
+            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
             return false;
         }
     }
@@ -122,7 +128,7 @@ class EmailService
 
             return $this->mailer->send();
         } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}"); //Remove in production
+            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
             return false;
         }
     }
@@ -130,6 +136,10 @@ class EmailService
     public function sendOutbidNotification($email, $name, $lotTitle, $lotId)
     {
         try {
+            // Clear all addresses and attachments for reuse
+            $this->mailer->clearAllRecipients();
+            $this->mailer->clearAttachments();
+            
             // Recipients
             $this->mailer->addAddress($email, $name);
 
@@ -167,10 +177,10 @@ class EmailService
                 Don\'t miss out!
                 Regards,
                 The NanoBid Team';
-
+            
             return $this->mailer->send();
         } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            error_log("Failed to send outbid notification: " . $e->getMessage());
             return false;
         }
     }
@@ -178,6 +188,10 @@ class EmailService
     public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount)
     {
         try {
+            // Clear all addresses and attachments for reuse
+            $this->mailer->clearAllRecipients();
+            $this->mailer->clearAttachments();
+            
             // Recipients
             $this->mailer->addAddress($email, $name);
 
@@ -216,10 +230,10 @@ class EmailService
                 Thank you for participating in our auction!
                 Regards,
                 The NanoBid Team';
-
+            
             return $this->mailer->send();
         } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
+            error_log("Failed to send winning notification: " . $e->getMessage());
             return false;
         }
     }

@@ -181,12 +181,21 @@
         const timer = document.querySelector('.auction-timer');
         if (timer) {
             const endTime = new Date(timer.dataset.end).getTime();
+            const serverTimeOffset = <?= time() * 1000 ?> - Date.now(); // Calculate server-client time difference
+            
             const updateTimer = function () {
-                const now = new Date().getTime();
-                const distance = endTime - now;
+                const clientNow = Date.now();
+                const serverNow = clientNow + serverTimeOffset; // Use server time
+                const distance = endTime - serverNow;
 
                 if (distance < 0) {
                     timer.innerHTML = '<div class="text-danger fw-bold">Auction has ended</div>';
+                    // Auto-refresh page after 3 seconds when timer ends
+                    if (distance > -3000) { // Only schedule refresh once, when we're within 3 seconds of ending
+                        setTimeout(function() {
+                            location.reload();
+                        }, 3000);
+                    }
                     return;
                 }
 

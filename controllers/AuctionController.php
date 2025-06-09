@@ -461,7 +461,7 @@ class AuctionController extends BaseController
             // Get BidController to send winning notifications
             require_once 'controllers/BidController.php';
             $bidController = new BidController();
-            $bidController->sendWinningNotifications($id, true);
+            $bidController->sendWinningNotifications($id, true, false);
 
             $this->setSuccessMessage('Auction ended successfully and winning notifications sent.');
         } else {

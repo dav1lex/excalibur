@@ -319,6 +319,7 @@
     // Countdown timer for live auctions
     document.addEventListener('DOMContentLoaded', function () {
         const timers = document.querySelectorAll('.auction-timer');
+        const serverTimeOffset = <?= time() * 1000 ?> - Date.now(); // Calculate server-client time difference
 
         timers.forEach(timer => {
             const startTime = new Date(timer.dataset.start).getTime();
@@ -331,27 +332,35 @@
             const secondsSpan = timer.querySelector('.seconds');
 
             const updateTimer = function () {
-                const now = new Date().getTime();
+                const clientNow = Date.now();
+                const serverNow = clientNow + serverTimeOffset; // Use server time
                 let distance;
                 let labelText = "";
                 let showTimerSpans = true; // Flag to control visibility of d/h/m/s spans
                 timer.style.color = ''; // Reset color
 
-                if (auctionStatus === 'upcoming' && now < startTime) {
+                if (auctionStatus === 'upcoming' && serverNow < startTime) {
                     // Auction is upcoming, counting down to start
-                    distance = startTime - now;
+                    distance = startTime - serverNow;
                     labelText = "Starts in:";
                     timer.style.color = 'green';
-                } else if ((auctionStatus === 'live' || (auctionStatus === 'upcoming' && now >= startTime)) && now < endTime) {
+                } else if ((auctionStatus === 'live' || (auctionStatus === 'upcoming' && serverNow >= startTime)) && serverNow < endTime) {
                     // Auction is live (or transitioned from upcoming), counting down to end
-                    distance = endTime - now;
+                    distance = endTime - serverNow;
                     labelText = "Time left:";
                 } else {
                     // Auction has ended or state is unexpected
                     showTimerSpans = false;
-                    if (auctionStatus === 'ended' || now >= endTime) {
+                    if (auctionStatus === 'ended' || serverNow >= endTime) {
                         // Covers explicitly ended auctions or time has passed for live/upcoming
                         timer.innerHTML = '<span class="badge bg-secondary fs-6">Auction has ended</span>';
+                        
+                        // Auto-refresh page after 3 seconds when timer ends
+                        if (auctionStatus === 'live' && (serverNow - endTime < 3000)) {
+                            setTimeout(function() {
+                                location.reload();
+                            }, 3000);
+                        }
                     } else {
                         // Fallback for unexpected states (should be rare)
                         timer.innerHTML = '<span class="badge bg-info fs-6">Updating status...</span>';
@@ -385,6 +394,13 @@
                     // Hide d/h/m/s spans and show a message if not already done by the main logic.
                     if (!timer.querySelector('.badge')) { // Avoid double messaging
                         timer.innerHTML = '<span class="badge bg-secondary fs-6">Auction has ended</span>';
+                        
+                        // Auto-refresh page after 3 seconds when timer ends
+                        if (auctionStatus === 'live') {
+                            setTimeout(function() {
+                                location.reload();
+                            }, 3000);
+                        }
                     }
                 }
             };

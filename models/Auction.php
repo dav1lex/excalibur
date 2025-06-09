@@ -180,56 +180,91 @@ class Auction extends BaseModel
         return $stmt->fetchColumn();
     }
 
+    /**
+     * Update auction statuses based on start_date and end_date
+     * This handles auction transitions and sends winning notifications
+     */
     public function updateStatuses()
     {
-        // --- Handle Live to Ended transition and send notifications ---
-
-        // 1. Find live auctions that should now be ended.
+        // Find live auctions that should now be ended
         $sqlLiveEnded = "SELECT id FROM auctions WHERE status = 'live' AND end_date <= NOW()";
         $stmtLiveEnded = $this->conn->prepare($sqlLiveEnded);
         $stmtLiveEnded->execute();
         $auctionsToEnd = $stmtLiveEnded->fetchAll(PDO::FETCH_COLUMN);
 
         if (!empty($auctionsToEnd)) {
-            // This needs the BidController to send notifications.
-            // We require it here to avoid circular dependencies if it were in the constructor.
             require_once 'controllers/BidController.php';
             $bidController = new BidController();
-
+            
+            $auctionsUpdated = [];
+            
             foreach ($auctionsToEnd as $auctionId) {
                 try {
                     $this->conn->beginTransaction();
-
-                    // 2. Update status for this specific auction.
-                    // We add a `status = 'live'` check to prevent race conditions.
+        
+                    // Update auction status to ended
                     $sqlUpdate = "UPDATE auctions SET status = 'ended', updated_at = NOW() WHERE id = :id AND status = 'live'";
                     $stmtUpdate = $this->conn->prepare($sqlUpdate);
                     $stmtUpdate->bindParam(':id', $auctionId, PDO::PARAM_INT);
-                    $updated = $stmtUpdate->execute();
-
-                    // Only send notifications if the update was successful.
-                    if ($updated) {
-                        // 3. Send notifications
-                        $bidController->sendWinningNotifications($auctionId, false);
-                        error_log("Auction #$auctionId ended automatically, winning notifications sent.");
+                    $stmtUpdate->execute();
+                    $rowsAffected = $stmtUpdate->rowCount();
+                    
+                    if($rowsAffected > 0) {
+                        // Get all lots in this auction
+                        $sqlLots = "SELECT id FROM lots WHERE auction_id = :auction_id";
+                        $stmtLots = $this->conn->prepare($sqlLots);
+                        $stmtLots->bindParam(':auction_id', $auctionId, PDO::PARAM_INT);
+                        $stmtLots->execute();
+                        $lots = $stmtLots->fetchAll(PDO::FETCH_COLUMN);
+                        
+                        // For each lot, update bid statuses
+                        foreach ($lots as $lotId) {
+                            // Find the highest bid for this lot
+                            $sqlHighestBid = "SELECT id FROM bids WHERE lot_id = :lot_id AND status = 'active' ORDER BY amount DESC LIMIT 1";
+                            $stmtHighestBid = $this->conn->prepare($sqlHighestBid);
+                            $stmtHighestBid->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
+                            $stmtHighestBid->execute();
+                            $highestBidId = $stmtHighestBid->fetchColumn();
+                            
+                            if ($highestBidId) {
+                                // Update the highest bid to 'won'
+                                $sqlUpdateWinner = "UPDATE bids SET status = 'won' WHERE id = :bid_id";
+                                $stmtUpdateWinner = $this->conn->prepare($sqlUpdateWinner);
+                                $stmtUpdateWinner->bindParam(':bid_id', $highestBidId, PDO::PARAM_INT);
+                                $stmtUpdateWinner->execute();
+                                
+                                // Update all other active bids for this lot to 'lost'
+                                $sqlUpdateLosers = "UPDATE bids SET status = 'lost' WHERE lot_id = :lot_id AND id != :bid_id AND status = 'active'";
+                                $stmtUpdateLosers = $this->conn->prepare($sqlUpdateLosers);
+                                $stmtUpdateLosers->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
+                                $stmtUpdateLosers->bindParam(':bid_id', $highestBidId, PDO::PARAM_INT);
+                                $stmtUpdateLosers->execute();
+                            }
+                        }
+                        
+                        // Add this auction to the list of successfully updated auctions
+                        $auctionsUpdated[] = $auctionId;
                     }
 
                     $this->conn->commit();
                 } catch (Exception $e) {
                     $this->conn->rollBack();
-                    error_log("Error ending auction #$auctionId automatically: " . $e->getMessage());
+                    error_log("Error updating auction status: " . $e->getMessage());
                 }
             }
+            
+            // Send notifications for each successfully updated auction AFTER all transactions are committed
+            foreach ($auctionsUpdated as $auctionId) {
+                $bidController->sendWinningNotifications($auctionId, false, true);
+            }
         }
-
-        // --- Handle Upcoming to Live transition ---
-
-        // This can be a simple update as it doesn't trigger notifications.
+        
+        // Handle Upcoming to Live transition
         $sqlUpcomingLive = "UPDATE auctions SET status = 'live', updated_at = NOW() 
                             WHERE status = 'upcoming' AND start_date <= NOW() AND end_date > NOW()";
         $stmtUpcomingLive = $this->conn->prepare($sqlUpcomingLive);
         $stmtUpcomingLive->execute();
-
+        
         return true;
     }
 

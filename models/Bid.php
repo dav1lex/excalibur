@@ -555,4 +555,28 @@ class Bid extends BaseModel
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Get a bid for a lot with a specific status (e.g., 'won')
+     * 
+     * @param int $lot_id The lot ID
+     * @param string $status The bid status to look for
+     * @return array|bool The bid with the specified status or false if none
+     */
+    public function getWinningBidByStatus($lot_id, $status)
+    {
+        $sql = "SELECT b.*, u.id as user_id, u.email, u.name
+                FROM bids b
+                JOIN users u ON b.user_id = u.id
+                WHERE b.lot_id = :lot_id
+                AND b.status = :status
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':lot_id', $lot_id, PDO::PARAM_INT);
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

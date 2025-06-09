@@ -75,7 +75,7 @@ class BidController extends BaseController
 
         // Calculate minimum bid amount
         $minimumBid = $this->bidModel->getNextMinimumBid($lot['current_price']);
-
+        
         // Validate bid amount
         if ($bid_amount < $minimumBid) {
             $this->setErrorMessage('Your bid must be at least ' . $minimumBid . '€. The bid increment for this price range is ' . $this->bidModel->getBidIncrement($lot['current_price']) . '€.');
@@ -84,17 +84,10 @@ class BidController extends BaseController
         }
 
         // Validate max amount if provided
-        if ($max_amount !== null) {
-            if ($max_amount < $bid_amount) {
-                $this->setErrorMessage('Maximum bid amount must be greater than or equal to your bid amount.');
-                $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
-                return;
-            }
-
-            // Log for debugging
-            error_log("User {$_SESSION['user_id']} placed a bid with amount: $bid_amount and max_amount: $max_amount on lot: $lot_id");
-        } else {
-            error_log("User {$_SESSION['user_id']} placed a regular bid with amount: $bid_amount on lot: $lot_id");
+        if ($max_amount !== null && $max_amount < $bid_amount) {
+            $this->setErrorMessage('Maximum bid amount must be greater than or equal to your bid amount.');
+            $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
+            return;
         }
 
         // Place the bid
@@ -121,18 +114,13 @@ class BidController extends BaseController
                         $lot['title'],
                         $lot_id
                     );
-                    error_log("Outbid notification sent to user: {$outbidUser['email']} for lot: {$lot['title']}");
                 }
             }
-
-            if ($proxyResult) {
-                if ($max_amount !== null) {
-                    $this->setSuccessMessage('Your bid has been placed successfully with a maximum amount of ' . $max_amount . '€. The system will automatically bid on your behalf up to this amount.');
-                } else {
-                    $this->setSuccessMessage('Your bid has been placed successfully.');
-                }
+            
+            if ($max_amount !== null) {
+                $this->setSuccessMessage('Your bid has been placed successfully with a maximum amount of ' . $max_amount . '€. The system will automatically bid on your behalf up to this amount.');
             } else {
-                $this->setSuccessMessage('Your bid was placed, but there was an issue with proxy bidding. Please check the current status.');
+                $this->setSuccessMessage('Your bid has been placed successfully.');
             }
         } else {
             $this->setErrorMessage('There was an error placing your bid. Please try again.');
@@ -164,7 +152,7 @@ class BidController extends BaseController
 
         if (!$lot_id) {
             $this->setErrorMessage('Lot ID is required.');
-            $this->redirectBack();
+            $this->redirectBack(); 
             return;
         }
 
@@ -204,7 +192,7 @@ class BidController extends BaseController
         // Ensure POST 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->setErrorMessage('Invalid request method.');
-            $this->redirectBack();
+            $this->redirectBack(); 
             return;
         }
 
@@ -216,7 +204,7 @@ class BidController extends BaseController
             $this->redirectBack();
             return;
         }
-
+        
         // Fetch lot details to get auction_id for redirect, and to ensure lot exists
         $lot = $this->lotModel->getById($lot_id);
         if (!$lot) {
@@ -274,16 +262,16 @@ class BidController extends BaseController
 
     /**
      * Send winning notifications when an auction ends
-     * This method should be called by a cron job or when an auction is closed manually
      * 
      * @param int $auction_id The auction ID
-     * @param bool $shouldRedirect Whether to redirect after sending notifications (default: true)
+     * @param bool $shouldRedirect Whether to redirect after sending notifications
+     * @param bool $bypassAdminCheck Whether to bypass the admin check (for automatic updates)
      * @return bool True if notifications were sent successfully
      */
-    public function sendWinningNotifications($auction_id, $shouldRedirect = true)
+    public function sendWinningNotifications($auction_id, $shouldRedirect = true, $bypassAdminCheck = false)
     {
         // Check if user is admin or has appropriate permissions
-        if (!$this->isAdmin()) {
+        if (!$bypassAdminCheck && !$this->isAdmin()) {
             $this->setErrorMessage('You do not have permission to perform this action.');
             if ($shouldRedirect) {
                 $this->redirect(BASE_URL);
@@ -293,36 +281,50 @@ class BidController extends BaseController
 
         // Get all lots in the auction
         $lots = $this->lotModel->getByAuctionId($auction_id);
+        $sentCount = 0;
 
         foreach ($lots as $lot) {
-            // Get the winning bid for each lot
-            $winningBid = $this->bidModel->getWinningBid($lot['id']);
+            // Get the winning bid for the lot (bid with status 'won')
+            $winningBid = $this->bidModel->getWinningBidByStatus($lot['id'], 'won');
 
             if ($winningBid) {
                 // Get the winning user's details
                 $winner = $this->userModel->getById($winningBid['user_id']);
 
                 if ($winner) {
-                    // Send winning notification
-                    $this->emailService->sendWinningNotification(
-                        $winner['email'],
-                        $winner['name'],
-                        $lot['title'],
-                        $lot['id'],
-                        $winningBid['amount']
-                    );
-
-                    error_log("Winning notification sent to user: {$winner['email']} for lot: {$lot['title']}");
+                    try {
+                        // Send winning notification
+                        $this->emailService->sendWinningNotification(
+                            $winner['email'],
+                            $winner['name'],
+                            $lot['title'],
+                            $lot['id'],
+                            $winningBid['amount']
+                        );
+                        $sentCount++;
+                    } catch (Exception $e) {
+                        error_log("Failed to send winning notification: " . $e->getMessage());
+                    }
                 }
             }
         }
 
-        $this->setSuccessMessage('Winning notifications sent successfully.');
+        if ($sentCount > 0) {
+            $message = "Winning notifications sent successfully for $sentCount lots.";
+            if ($shouldRedirect) {
+                $this->setSuccessMessage($message);
+            }
+        } else {
+            $message = "No winning notifications were sent. Either there were no lots with bids or an error occurred.";
+            if ($shouldRedirect) {
+                $this->setErrorMessage($message);
+            }
+        }
 
         if ($shouldRedirect) {
             $this->redirect(BASE_URL . 'auctions/edit/' . $auction_id);
         }
-
-        return true;
+        
+        return $sentCount > 0;
     }
 }   
