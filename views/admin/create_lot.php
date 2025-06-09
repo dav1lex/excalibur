@@ -60,13 +60,8 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="starting_price" class="form-label">Starting Price ($) <span class="text-danger">*</span></label>
+                            <label for="starting_price" class="form-label">Starting Price (€) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="starting_price" name="starting_price" min="1" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="reserve_price" class="form-label">Reserve Price ($) <small class="text-muted">(Optional)</small></label>
-                            <input type="number" class="form-control" id="reserve_price" name="reserve_price" min="1">
-                            <div class="form-text">Minimum price for the lot to sell. Leave empty for no reserve.</div>
                         </div>
                     </div>
                     

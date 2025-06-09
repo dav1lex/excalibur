@@ -43,7 +43,6 @@
                         <table class="table table-striped table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
@@ -60,7 +59,6 @@
                                 <?php else: ?>
                                     <?php foreach ($users as $userData): ?>
                                         <tr>
-                                            <td><?= $userData['id'] ?></td>
                                             <td><?= htmlspecialchars($userData['name']) ?></td>
                                             <td><?= htmlspecialchars($userData['email']) ?></td>
                                             <td>

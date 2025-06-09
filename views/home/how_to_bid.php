@@ -178,18 +178,7 @@
                             </div>
                         </div>
                         
-                        <div class="accordion-item border mb-3">
-                            <h2 class="accordion-header" id="headingThree">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    What is a reserve price?
-                                </button>
-                            </h2>
-                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#bidFAQ">
-                                <div class="accordion-body">
-                                    A reserve price is the minimum amount the seller is willing to accept for an item. If the final bid does not meet the reserve price, the item will not be sold. The reserve price is not disclosed to bidders.
-                                </div>
-                            </div>
-                        </div>
+                        
                         
                         <div class="accordion-item border">
                             <h2 class="accordion-header" id="headingFour">

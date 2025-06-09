@@ -25,8 +25,16 @@ require_once 'models/Lot.php';
 require_once 'models/Bid.php';
 require_once 'models/Watchlist.php'; 
 
+$basePath = '';
+if (isset($_ENV['BASE_PATH'])) {
+    $basePath = $_ENV['BASE_PATH'];
+} else {
+    $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+    $basePath = ($scriptName === '/' || $scriptName === '\\') ? '' : $scriptName;
+}
+
 //  Router instance
-$router = new Router();
+$router = new Router($basePath);
 
 // routes
 

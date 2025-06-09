@@ -37,7 +37,6 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Lot</th>
                                 <th>User</th>
                                 <th>Amount</th>
@@ -50,10 +49,9 @@
                         <tbody>
                             <?php foreach ($bids as $bid): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($bid['id']) ?></td>
                                     <td>
                                         <a href="<?= BASE_URL ?>lots/view?id=<?= htmlspecialchars($bid['lot_id']) ?>">
-                                            <?= htmlspecialchars($bid['lot_title'] ?? 'Lot #' . $bid['lot_id']) ?>
+                                            <?= htmlspecialchars($bid['lot_number'] ) ?>
                                         </a>
                                     </td>
                                     <td><?= htmlspecialchars($bid['user_name'] ?? 'User #' . $bid['user_id']) ?></td>

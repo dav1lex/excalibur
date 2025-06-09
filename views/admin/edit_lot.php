@@ -71,27 +71,22 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="starting_price" class="form-label">Starting Price ($) <span
+                                <label for="starting_price" class="form-label">Starting Price (€) <span
                                         class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="starting_price" name="starting_price"
                                     min="1" value="<?= $lot['starting_price'] ?>" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="reserve_price" class="form-label">Reserve Price ($) <small
-                                        class="text-muted">(Optional)</small></label>
-                                <input type="number" class="form-control" id="reserve_price" name="reserve_price"
-                                    min="1" value="<?= $lot['reserve_price'] ?>">
-                                <div class="form-text">Minimum price for the lot to sell. Leave empty for no reserve.
+                                <div class="mb-3">
+                                    <label for="current_price" class="form-label">Current Price (€)</label>
+                                    <input type="number" class="form-control" id="current_price" name="current_price"
+                                        value="<?= $lot['current_price'] ?>" readonly>
+                                    <div class="form-text">This is automatically updated when bids are placed.</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="current_price" class="form-label">Current Price ($)</label>
-                            <input type="number" class="form-control" id="current_price" name="current_price"
-                                value="<?= $lot['current_price'] ?>" readonly>
-                            <div class="form-text">This is automatically updated when bids are placed.</div>
-                        </div>
+
 
                         <?php if (!empty($lot['image_path'])): ?>
                             <div class="mb-3">

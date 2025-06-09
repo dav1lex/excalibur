@@ -9,7 +9,7 @@ class Bid extends BaseModel
      */
     public function getAll($limit = null, $offset = 0)
     {
-        $sql = "SELECT b.*, l.title as lot_title, l.current_price, l.starting_price, a.title as auction_title, 
+        $sql = "SELECT b.*, l.title as lot_title, l.current_price, l.starting_price,  l.lot_number, a.title as auction_title, 
                 a.end_date as auction_end_date, u.name as user_name
                 FROM bids b
                 JOIN lots l ON b.lot_id = l.id

@@ -3,6 +3,13 @@ class Router
 {
     private $routes = [];
     private $notFoundCallback;
+    private $basePath = '';
+
+    public function __construct($basePath = '')
+    {
+        // Set the base path for subdirectory installations
+        $this->basePath = $basePath;
+    }
 
     public function get($path, $callback)
     {
@@ -32,11 +39,20 @@ class Router
             $uri = rtrim($uri, '/');
         }
 
+        // Remove base path from URI if in a subdirectory
+        if (!empty($this->basePath) && strpos($uri, $this->basePath) === 0) {
+            $uri = substr($uri, strlen($this->basePath));
+        }
+        
+        // If URI is empty after removing base path, set it to '/'
+        if (empty($uri)) {
+            $uri = '/';
+        }
+
         // Look for direct match
         if (isset($this->routes[$method][$uri])) {
             return $this->executeCallback($this->routes[$method][$uri]);
         }
-
 
         foreach ($this->routes[$method] as $route => $callback) {
             if (strpos($route, ':') === false) {

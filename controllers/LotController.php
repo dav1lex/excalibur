@@ -138,7 +138,6 @@ class LotController extends BaseController
         $description = $_POST['description'] ?? '';
         $lot_number = $_POST['lot_number'] ?? '';
         $starting_price = isset($_POST['starting_price']) ? (int) $_POST['starting_price'] : 0;
-        $reserve_price = isset($_POST['reserve_price']) ? (int) $_POST['reserve_price'] : null;
 
         // Basic validation
         if (empty($title) || empty($description) || empty($lot_number) || $starting_price <= 0) {
@@ -205,7 +204,6 @@ class LotController extends BaseController
             'description' => $description,
             'lot_number' => $lot_number,
             'starting_price' => $starting_price,
-            'reserve_price' => $reserve_price,
             'image_path' => $image_path
         ]);
 
@@ -282,7 +280,6 @@ class LotController extends BaseController
         $description = $_POST['description'] ?? '';
         $lot_number = $_POST['lot_number'] ?? '';
         $starting_price = isset($_POST['starting_price']) ? (int) $_POST['starting_price'] : 0;
-        $reserve_price = isset($_POST['reserve_price']) && $_POST['reserve_price'] !== '' ? (int) $_POST['reserve_price'] : null;
 
         if (empty($title) || empty($description) || empty($lot_number) || $starting_price <= 0) {
             $this->setErrorMessage('Please fill in all required fields with valid values');
@@ -308,7 +305,6 @@ class LotController extends BaseController
             'description' => $description,
             'lot_number' => $lot_number,
             'starting_price' => $starting_price,
-            'reserve_price' => $reserve_price
         ];
 
         if (isset($lotData['starting_price']) && $lotData['starting_price'] != $lot['starting_price']) {

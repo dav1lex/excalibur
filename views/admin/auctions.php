@@ -63,19 +63,18 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead>
+                    <table class="table table-striped table-hover align-middle table-bordered">
+                        <thead class="text-center">
                             <tr>
-                                <th>ID</th>
+                                <th>Image</th>
                                 <th>Title</th>
                                 <th>Status</th>
-                                <th>Start Date</th>
                                 <th>End Date</th>
                                 <th>Lots</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="text-center">
                             <?php if (empty($auctions)): ?>
                                 <tr>
                                     <td colspan="7" class="text-center">No auctions found.</td>
@@ -83,7 +82,15 @@
                             <?php else: ?>
                                 <?php foreach ($auctions as $auction): ?>
                                     <tr>
-                                        <td><?= $auction['id'] ?></td>
+                                        <td>
+                                        <?php if (!empty($auction['image_path'])): ?>
+                                                    <img src="<?= BASE_URL . htmlspecialchars($auction['image_path']) ?>"
+                                                        alt="Auction Image" class="img-thumbnail"
+                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">No Image</span>
+                                                <?php endif; ?>
+                                        </td>
                                         <td><?= htmlspecialchars($auction['title']) ?></td>
                                         <td>
                                             <?php
@@ -112,7 +119,6 @@
                                                 <?= $badgeText ?>
                                             </span>
                                         </td>
-                                        <td><?= date('M j, Y, g:i A', strtotime($auction['start_date'])) ?></td>
                                         <td><?= date('M j, Y, g:i A', strtotime($auction['end_date'])) ?></td>
                                         <td>
                                             <?= $lotCounts[$auction['id']] ?? 0 ?>
@@ -133,7 +139,7 @@
                                                 </a>
                                                 <?php if ($auction['status'] === 'live'): ?>
                                                 <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#endAuctionModal<?= $auction['id'] ?>" title="End Auction">
+                                                    data-bs-target="#endAuctionModal<?= $auction['id'] ?>" title="Force finish auction (DELETE LATER)">
                                                     <i class="bi bi-flag-fill"></i>
                                                 </button>
                                                 <?php endif; ?>

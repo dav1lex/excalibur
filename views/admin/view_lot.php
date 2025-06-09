@@ -6,11 +6,6 @@
                 <i class="bi bi-arrow-left"></i> Back to Lots
             </a>
         </div>
-        <div class="col-md-6 text-end">
-            <a href="<?= BASE_URL ?>lots/edit?id=<?= $lot['id'] ?>" class="btn btn-primary">
-                <i class="bi bi-pencil"></i> Edit Lot
-            </a>
-        </div>
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-dismissible fade show">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>
@@ -29,28 +24,12 @@
     </div>
 
     <div class="row g-4">
-        <!-- Left column with lot details -->
+        <!-- Left col,  lot details -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom-0 py-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Lot Information</h5>
-                        <?php
-                        $badgeClass = 'bg-secondary';
-                        $badgeText = 'Draft';
-
-                        if ($auction['status'] === 'upcoming') {
-                            $badgeClass = 'bg-info';
-                            $badgeText = 'Upcoming';
-                        } elseif ($auction['status'] === 'live') {
-                            $badgeClass = 'bg-success';
-                            $badgeText = 'Live';
-                        } elseif ($auction['status'] === 'ended') {
-                            $badgeClass = 'bg-dark';
-                            $badgeText = 'Ended';
-                        }
-                        ?>
-                        <span class="badge <?= $badgeClass ?>"><?= $badgeText ?></span>
                     </div>
                 </div>
                 <div class="card-body">
@@ -67,18 +46,19 @@
                             <?php endif; ?>
                         </div>
                         <div class="col-md-7">
-                            <h2 class="h4 mb-3"><?= htmlspecialchars($lot['title']) ?></h2>
-
                             <div class="mb-3">
                                 <div class="row mb-2">
                                     <div class="col-md-5 text-muted">Lot Number:</div>
-                                    <div class="col-md-7 fw-medium"><?= htmlspecialchars($lot['lot_number']) ?></div>
+                                    <div class="col-md-7 fw-medium">
+                                        <a
+                                            href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $lot['id'] ?>"><?= htmlspecialchars($lot['lot_number']) ?></a>
+                                    </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-5 text-muted">Auction:</div>
                                     <div class="col-md-7">
                                         <a
-                                            href="<?= BASE_URL ?>auctions/view?id=<?= $auction['id'] ?>"><?= htmlspecialchars($auction['title']) ?></a>
+                                            href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>"><?= htmlspecialchars($auction['title']) ?></a>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
@@ -91,12 +71,6 @@
                                         <?= number_format($lot['current_price']) ?>€
                                     </div>
                                 </div>
-                                <?php if ($lot['reserve_price']): ?>
-                                    <div class="row mb-2">
-                                        <div class="col-md-5 text-muted">Reserve Price:</div>
-                                        <div class="col-md-7"><?= number_format($lot['reserve_price']) ?>€</div>
-                                    </div>
-                                <?php endif; ?>
                                 <div class="row mb-2">
                                     <div class="col-md-5 text-muted">Created:</div>
                                     <div class="col-md-7"><?= date('M j, Y, g:i A', strtotime($lot['created_at'])) ?>
@@ -134,20 +108,19 @@
                             <table class="table table-striped table-hover align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Bid ID</th>
                                         <th>User</th>
                                         <th>Amount</th>
-                                        <th>Max Amount</th>
+                                        <th>Proxy</th>
                                         <th>Date & Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($bids as $bid): ?>
                                         <tr <?= isset($winner) && $winner['id'] === $bid['id'] ? 'class="table-success"' : '' ?>>
-                                            <td><?= $bid['id'] ?></td>
                                             <td><?= htmlspecialchars($bid['user_name']) ?></td>
                                             <td class="fw-bold"><?= number_format($bid['amount']) ?>€</td>
-                                            <td><?= $bid['max_amount'] ? number_format($bid['max_amount']) . '€' : 'N/A' ?></td>
+                                            <td><?= $bid['max_amount'] ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-x-circle-fill"></i>' ?>
+                                            </td>
                                             <td><?= date('M j, Y, g:i A', strtotime($bid['placed_at'])) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -227,16 +200,6 @@
                                 <div class="col-md-5 text-muted">Bid Time:</div>
                                 <div class="col-md-7"><?= date('M j, Y, g:i A', strtotime($winner['placed_at'])) ?></div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-5 text-muted">Reserve Met:</div>
-                                <div class="col-md-7">
-                                    <?php if (!$lot['reserve_price'] || $winner['amount'] >= $lot['reserve_price']): ?>
-                                        <span class="badge bg-success">Yes</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-danger">No</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
                         <?php else: ?>
                             <div class="alert alert-warning mb-0">
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i> This lot did not receive any bids.
@@ -245,6 +208,7 @@
                     </div>
                 </div>
             <?php endif; ?>
+
 
             <!-- Admin Actions -->
             <div class="card border-0 shadow-sm mb-4">
@@ -256,10 +220,16 @@
                         <a href="<?= BASE_URL ?>lots/edit?id=<?= $lot['id'] ?>" class="btn btn-primary">
                             <i class="bi bi-pencil me-2"></i>Edit Lot
                         </a>
+
+                        <a href="<?= BASE_URL ?>lots/view?id=<?= $lot['id'] ?>" class="btn btn-success">
+                            <i class="bi bi-eye me-2"></i>View Lot Page
+                        </a>
+                       
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                             data-bs-target="#deleteLotModal">
                             <i class="bi bi-trash me-2"></i>Delete Lot
                         </button>
+
                     </div>
                 </div>
             </div>

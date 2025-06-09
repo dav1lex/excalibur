@@ -383,11 +383,11 @@ class AuctionController extends BaseController
         if (empty($image_path)) {
             return true; // No image to delete
         }
-
+        
         if (file_exists($image_path)) {
             return @unlink($image_path);
         }
-
+        
         return true; // File doesn't exist, so consider deletion successful
     }
 
@@ -422,7 +422,7 @@ class AuctionController extends BaseController
         } else {
             $this->setErrorMessage('Error deleting auction');
         }
-
+      
         $this->redirect(BASE_URL . 'admin/auctions');
     }
 

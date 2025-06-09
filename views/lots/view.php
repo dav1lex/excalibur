@@ -243,7 +243,10 @@
                                 <div class="alert alert-info mb-3">
                                     <strong><i class="bi bi-info-circle"></i> Proxy Bidding:</strong> The system will bid on
                                     your behalf up to your maximum amount, as needed to outbid others.
+                                    <div class="form-text">Bids are legally binding and cannot be deleted. Please 
+                                        contact the administrator if you need to cancel a bid.</div>
                                 </div>
+                                        
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary btn-lg">Place Bid</button>
                                 </div>

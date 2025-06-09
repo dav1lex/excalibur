@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS lots (
     description TEXT NOT NULL,
     lot_number VARCHAR(50) NOT NULL,
     starting_price INT NOT NULL,
-    reserve_price INT NULL,
     current_price INT NOT NULL,
     image_path VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

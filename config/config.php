@@ -1,18 +1,25 @@
 <?php
-// Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'auction_platform');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// Application Configuration
-define('SITE_NAME', 'NanoBid');
-define('BASE_URL', 'http://localhost/');  // Update lateer
+use Dotenv\Dotenv;
 
-// File Upload Configuration
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+// Database 
+define('DB_HOST', $_ENV['DB_HOST']);
+define('DB_NAME', $_ENV['DB_NAME']);
+define('DB_USER', $_ENV['DB_USER']);
+define('DB_PASS', $_ENV['DB_PASS']);
+
+// Application cfg
+define('SITE_NAME', $_ENV['SITE_NAME']);
+define('BASE_URL', $_ENV['BASE_URL']);  // Update lateer
+
+//  Upload 
 define('MAX_FILE_SIZE', 6 * 1024 * 1024); // 6MB
 define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png']);
 define('UPLOAD_DIR', $_SERVER['DOCUMENT_ROOT'] . '/public/uploads/images/');
 
-// Session Configuration
+// Session 
 define('SESSION_LIFETIME', 60 * 60 * 1); // 1 hour 

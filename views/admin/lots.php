@@ -92,8 +92,8 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
-                            <thead>
+                        <table class="table table-striped table-hover align-center table-bordered">
+                            <thead class="text-center">
                                 <tr>
                                     <th>Image</th>
                                     <th>Lot #</th>
@@ -102,12 +102,11 @@
                                     <th>Auction</th>
                                     <?php endif; ?>
                                     <th>Description</th>
-                                    <th>Starting Price</th>
                                     <th>Current Price</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="text-center align-middle">
                                 <?php if (empty($lots)): ?>
                                     <tr>
                                         <td colspan="7" class="text-center">No lots found.</td>
@@ -132,7 +131,6 @@
                                             <td title="<?= htmlspecialchars($lot['description']) ?>">
                                                 <?= htmlspecialchars(strlen($lot['description']) > 25 ? substr($lot['description'], 0, 20) . '...' : $lot['description']) ?>
                                             </td>
-                                            <td class="text-muted"><?= number_format($lot['starting_price']) ?>€</td>
                                             <td class="fw-bold"><?= number_format($lot['current_price']) ?>€</td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">

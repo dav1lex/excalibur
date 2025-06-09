@@ -82,8 +82,8 @@ class Lot extends BaseModel
      */
     public function create($data)
     {
-        $sql = "INSERT INTO lots (auction_id, title, description, lot_number, starting_price, reserve_price, image_path, current_price, created_at, updated_at) 
-                VALUES (:auction_id, :title, :description, :lot_number, :starting_price, :reserve_price, :image_path, :current_price, NOW(), NOW())";
+        $sql = "INSERT INTO lots (auction_id, title, description, lot_number, starting_price, image_path, current_price, created_at, updated_at) 
+                VALUES (:auction_id, :title, :description, :lot_number, :starting_price, :image_path, :current_price, NOW(), NOW())";
 
         $stmt = $this->conn->prepare($sql);
 
@@ -98,12 +98,7 @@ class Lot extends BaseModel
         $stmt->bindParam(':starting_price', $data['starting_price'], PDO::PARAM_INT);
         $stmt->bindParam(':current_price', $current_price, PDO::PARAM_INT);
 
-        // Handle potentially NULL values
-        if ($data['reserve_price'] === null || $data['reserve_price'] === '') {
-            $stmt->bindValue(':reserve_price', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':reserve_price', $data['reserve_price'], PDO::PARAM_INT);
-        }
+
 
         if ($data['image_path'] === null || $data['image_path'] === '') {
             $stmt->bindValue(':image_path', null, PDO::PARAM_NULL);

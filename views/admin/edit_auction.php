@@ -165,7 +165,6 @@
                                 <th>Title</th>
                                 <th>Starting Price</th>
                                 <th>Current Price</th>
-                                <th>Reserve Price</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -184,7 +183,6 @@
                                     <td><?= htmlspecialchars($lot['title']) ?></td>
                                     <td>$<?= number_format($lot['starting_price']) ?></td>
                                     <td>$<?= number_format($lot['current_price']) ?></td>
-                                    <td><?= $lot['reserve_price'] ? '$' . number_format($lot['reserve_price']) : 'None' ?></td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <a href="<?= BASE_URL ?>auctions/<?= $auction['id'] ?>/lots/<?= $lot['id'] ?>"
