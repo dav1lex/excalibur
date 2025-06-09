@@ -195,28 +195,28 @@ class Auction extends BaseModel
         if (!empty($auctionsToEnd)) {
             require_once 'controllers/BidController.php';
             $bidController = new BidController();
-            
+
             $auctionsUpdated = [];
-            
+
             foreach ($auctionsToEnd as $auctionId) {
                 try {
                     $this->conn->beginTransaction();
-        
+
                     // Update auction status to ended
                     $sqlUpdate = "UPDATE auctions SET status = 'ended', updated_at = NOW() WHERE id = :id AND status = 'live'";
                     $stmtUpdate = $this->conn->prepare($sqlUpdate);
                     $stmtUpdate->bindParam(':id', $auctionId, PDO::PARAM_INT);
                     $stmtUpdate->execute();
                     $rowsAffected = $stmtUpdate->rowCount();
-                    
-                    if($rowsAffected > 0) {
+
+                    if ($rowsAffected > 0) {
                         // Get all lots in this auction
                         $sqlLots = "SELECT id FROM lots WHERE auction_id = :auction_id";
                         $stmtLots = $this->conn->prepare($sqlLots);
                         $stmtLots->bindParam(':auction_id', $auctionId, PDO::PARAM_INT);
                         $stmtLots->execute();
                         $lots = $stmtLots->fetchAll(PDO::FETCH_COLUMN);
-                        
+
                         // For each lot, update bid statuses
                         foreach ($lots as $lotId) {
                             // Find the highest bid for this lot
@@ -225,14 +225,14 @@ class Auction extends BaseModel
                             $stmtHighestBid->bindParam(':lot_id', $lotId, PDO::PARAM_INT);
                             $stmtHighestBid->execute();
                             $highestBidId = $stmtHighestBid->fetchColumn();
-                            
+
                             if ($highestBidId) {
                                 // Update the highest bid to 'won'
                                 $sqlUpdateWinner = "UPDATE bids SET status = 'won' WHERE id = :bid_id";
                                 $stmtUpdateWinner = $this->conn->prepare($sqlUpdateWinner);
                                 $stmtUpdateWinner->bindParam(':bid_id', $highestBidId, PDO::PARAM_INT);
                                 $stmtUpdateWinner->execute();
-                                
+
                                 // Update all other active bids for this lot to 'lost'
                                 $sqlUpdateLosers = "UPDATE bids SET status = 'lost' WHERE lot_id = :lot_id AND id != :bid_id AND status = 'active'";
                                 $stmtUpdateLosers = $this->conn->prepare($sqlUpdateLosers);
@@ -241,7 +241,7 @@ class Auction extends BaseModel
                                 $stmtUpdateLosers->execute();
                             }
                         }
-                        
+
                         // Add this auction to the list of successfully updated auctions
                         $auctionsUpdated[] = $auctionId;
                     }
@@ -252,19 +252,19 @@ class Auction extends BaseModel
                     error_log("Error updating auction status: " . $e->getMessage());
                 }
             }
-            
+
             // Send notifications for each successfully updated auction AFTER all transactions are committed
             foreach ($auctionsUpdated as $auctionId) {
                 $bidController->sendWinningNotifications($auctionId, false, true);
             }
         }
-        
+
         // Handle Upcoming to Live transition
         $sqlUpcomingLive = "UPDATE auctions SET status = 'live', updated_at = NOW() 
                             WHERE status = 'upcoming' AND start_date <= NOW() AND end_date > NOW()";
         $stmtUpcomingLive = $this->conn->prepare($sqlUpcomingLive);
         $stmtUpcomingLive->execute();
-        
+
         return true;
     }
 

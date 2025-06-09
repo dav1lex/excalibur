@@ -378,14 +378,14 @@ class LotController extends BaseController
         if (empty($image_path)) {
             return true; // No image to delete
         }
-        
+
         if (file_exists($image_path)) {
             return @unlink($image_path);
         }
-        
+
         return true; // File doesn't exist, so deletion successful
     }
-    
+
     /**
      * Admin: Delete lot
      */
