@@ -84,4 +84,5 @@ CREATE TABLE IF NOT EXISTS watchlist (
 
 -- Insert default admin user
 -- INSERT INTO users (name, email, password, role, is_confirmed) VALUES 
--- ('Admin', 'admin@test.com', 'run the hash.php, then put pw here', 'admin', 1);
+-- run hash.php if pw doesnt work
+-- ('Admin', 'admin@test.com', '$2y$10$N71PrwZwl.ix8lEm6AgCu.6rmIbMIND6u5.MEKfUGF7P98MsNdVP2', 'admin', 1);
