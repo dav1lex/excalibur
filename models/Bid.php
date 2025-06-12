@@ -90,7 +90,7 @@ class Bid extends BaseModel
     }
 
     /**
-     * Get user's winning bids (highest bid on ended auctions)
+     * Get user's winning bids (highest bid on ended auctions, so if auction ended, hghes bid is won, right?)
      */
     public function getUserWinningBids($user_id)
     {
@@ -113,15 +113,12 @@ class Bid extends BaseModel
 
     /**
      * Place a new bid
-     * Records the user's bid and updates the lot's current price.
      */
     public function placeBid($data)
     {
         try {
-            // Start a database transaction to ensure all operations succeed or fail together.
             $this->conn->beginTransaction();
 
-            // SQL to insert the new bid into the 'bids' table.
             $sql = "INSERT INTO bids (user_id, lot_id, amount, max_amount, placed_at) 
                     VALUES (:user_id, :lot_id, :amount, :max_amount, NOW())";
 
@@ -151,11 +148,11 @@ class Bid extends BaseModel
             // If all database operations were successful, commit the transaction.
             $this->conn->commit();
 
-            return $bidId; // Return the new bid's ID on success.
+            return $bidId; // Return the new bid's ID on success, so we can use it in the controller
         } catch (Exception $e) {
             // If any error occurred, roll back the transaction to undo changes.
             $this->conn->rollBack();
-            // Log the detailed error for server administrators.
+            // log 4 u
             error_log("Error in placeBid: " . $e->getMessage());
             return false; // Indicate failure.
         }
@@ -165,6 +162,7 @@ class Bid extends BaseModel
      * Process proxy bidding.
      * This method is called after a new bid is placed to handle automatic proxy bidding.
      * It checks if the new bid triggers any existing proxy bids and places them automatically.
+     * too much comments bcz of dogshit logic
      * 
      * @param int $lot_id_param The ID of the lot for which to process proxy bids.
      * @param int $recursionDepth Current recursion depth to prevent infinite loops.
@@ -176,14 +174,14 @@ class Bid extends BaseModel
         $lot_id = intval($lot_id_param);
 
         // Safety check: Prevent infinite recursion if proxy bids trigger too many counter-bids.
+        // shit gone crazy here, but i think it's ok
         if ($recursionDepth > 5) {
-            // Log this specific situation as it indicates a potential issue or complex scenario.
+            // log just in case so we can see if it's happening
             error_log("Proxy bidding recursion depth limit reached for lot_id: $lot_id");
             return true; // Stop processing to prevent server overload.
         }
 
         try {
-            // Start a database transaction for atomicity of operations.
             $this->conn->beginTransaction();
 
             // Step 1: Get the current highest bid for the lot.
@@ -330,6 +328,7 @@ class Bid extends BaseModel
 
             // Step 6: If an automatic bid was placed, re-run the process.
             // This handles cases where multiple proxy bids might compete with each other in sequence.
+            // so here is the `fairness` part
             if ($newBidPlaced) {
                 return $this->processProxyBidding($lot_id, $recursionDepth + 1);
             }
@@ -337,11 +336,11 @@ class Bid extends BaseModel
             // If no new bid was placed, or processing is complete for this cycle.
             return true;
         } catch (Exception $e) {
-            // If any error occurred during the process, roll back the transaction.
+            //  roll back if shit happens
             $this->conn->rollBack();
-            // Log the error for server administrators.
+            // Log
             error_log("Error in processProxyBidding: " . $e->getMessage());
-            return false; // Indicate failure.
+            return false; //fail
         }
     }
 
@@ -510,10 +509,10 @@ class Bid extends BaseModel
     }
 
     /**
-     * Get the current highest bid for a lot with complete user information
+     * Get the current highest bid for a lot with all user info
      * 
      * @param int $lot_id The lot ID
-     * @return array|bool The current highest bid with user information or false if none
+     * @return array|bool The current highest bid with user info or false if none
      */
     public function getCurrentHighestBid($lot_id)
     {

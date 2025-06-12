@@ -4,6 +4,7 @@ require_once 'controllers/BaseController.php';
 class HomeController extends BaseController {
     public function index() {
         // Get upcoming and live auctions
+        //probably i dont use it rn?
         $auctionModel = new Auction();
         $upcomingAuctions = $auctionModel->getByStatus('upcoming', 4);
         $liveAuctions = $auctionModel->getByStatus('live', 4);

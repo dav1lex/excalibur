@@ -15,16 +15,16 @@ class EmailService
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
-        
+        // put your details in .env, 
         $this->mailer->isSMTP();
-        $this->mailer->Host = $_ENV['SMTP_HOST']; //  SMTP 
+        $this->mailer->Host = $_ENV['SMTP_HOST']; 
         $this->mailer->SMTPAuth = true;
-        $this->mailer->Username = $_ENV['SMTP_USERNAME']; //  email
+        $this->mailer->Username = $_ENV['SMTP_USERNAME']; //  email acc or username
         $this->mailer->Password = $_ENV['SMTP_PASSWORD']; 
         $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $this->mailer->Port = $_ENV['SMTP_PORT'];
 
-        // Sender
+        // Sender, me
         $this->mailer->setFrom(
             $_ENV['SMTP_FROM_EMAIL'], 
             $_ENV['SMTP_FROM_NAME']
@@ -188,14 +188,11 @@ class EmailService
     public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount)
     {
         try {
-            // Clear all addresses and attachments for reuse
+                // clear all addresses and attachments for reuse
             $this->mailer->clearAllRecipients();
             $this->mailer->clearAttachments();
-            
-            // Recipients
             $this->mailer->addAddress($email, $name);
 
-            // Content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Congratulations! You won ' . $lotTitle;
 

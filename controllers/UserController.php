@@ -13,31 +13,31 @@ class UserController extends BaseController
 
     public function dashboard()
     {
-        // Check if user is logged in
+        // check if user is logged in
         if (!$this->isLoggedIn()) {
             $this->setErrorMessage('Please login to access your dashboard.');
             $this->redirect(BASE_URL . 'login');
             return;
         }
 
-        //just redirect admin to admin db
+        //just redirect admin to admin dashboard, ffs
         if($this->isAdmin()){
             $this->redirect(BASE_URL . 'admin/dashboard');
             return;
         }
 
-        // Get user data
+        // get user data
         $userId = $_SESSION['user_id'];
         $userData = $this->userModel->getById($userId);
 
-        // Load required models
+        // Load models
         require_once 'models/Bid.php';
         require_once 'models/Watchlist.php';
 
         $bidModel = new Bid();
         $watchlistModel = new Watchlist();
 
-        // Get user stats
+        // Get stats
         $stats = [
             'activeBids' => $bidModel->countUniqueActiveLotsByUser($userId),
             'wonItems' => 0,
@@ -45,7 +45,7 @@ class UserController extends BaseController
             'watchlist' => $watchlistModel->countByUser($userId)
         ];
 
-        // Get count of won items
+        // Get won items, count
         $wonBids = $bidModel->getUserWinningBids($userId);
         $stats['wonItems'] = count($wonBids);
 
@@ -66,7 +66,7 @@ class UserController extends BaseController
             return;
         }
 
-        // Load bid model
+        // bid model
         require_once 'models/Bid.php';
         $bidModel = new Bid();
         $userId = $_SESSION['user_id'];
@@ -84,7 +84,6 @@ class UserController extends BaseController
 
     public function profile()
     {
-        // Check if user is logged in
         if (!$this->isLoggedIn()) {
             $this->setErrorMessage('Please login to edit your profile.');
             $this->redirect(BASE_URL . 'login');
@@ -103,7 +102,6 @@ class UserController extends BaseController
 
     public function updateProfile()
     {
-        // Check if user is logged in
         if (!$this->isLoggedIn()) {
             $this->setErrorMessage('Please login to update your profile.');
             $this->redirect(BASE_URL . 'login');
@@ -122,32 +120,32 @@ class UserController extends BaseController
         $newPassword = $_POST['new_password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        // Validate input
+        // validate
         if (empty($name) || empty($email)) {
             $this->setErrorMessage('Please fill in all required fields.');
             $this->redirect(BASE_URL . 'user/profile');
             return;
         }
 
-        // Get current user data for validation
+        // get current user data for validation
         $userData = $this->userModel->getById($userId);
 
-        // Prepare data for update
+        // prepare data for update
         $data = [
             'name' => $name,
             'email' => $email
         ];
 
-        // If password change is requested
+        // if password change is requested
         if (!empty($newPassword)) {
-            // Verify current password
+            // verify current password
             if (!password_verify($currentPassword, $userData['password'])) {
                 $this->setErrorMessage('Current password is incorrect.');
                 $this->redirect(BASE_URL . 'user/profile');
                 return;
             }
 
-            // Check if new passwords match
+            // check if new passwords match
             if ($newPassword !== $confirmPassword) {
                 $this->setErrorMessage('New passwords do not match.');
                 $this->redirect(BASE_URL . 'user/profile');
@@ -157,9 +155,9 @@ class UserController extends BaseController
             $data['password'] = $newPassword;
         }
 
-        // Update user
+            // update user
         if ($this->userModel->update($userId, $data)) {
-            // Update session data
+            // update session data
             $_SESSION['user_name'] = $name;
             $_SESSION['user_email'] = $email;
 

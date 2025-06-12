@@ -12,6 +12,7 @@
             $this->conn = $database->getConnection();
         }
 
+        // get all
         public function getAll($limit = null, $offset = 0)
         {
             $query = "SELECT * FROM {$this->table}";

@@ -1,4 +1,4 @@
--- NanoBid Database Schema
+-- database
 
 -- Drop existing tables if they exist (for clean installation)
 SET foreign_key_checks = 0;
@@ -84,4 +84,4 @@ CREATE TABLE IF NOT EXISTS watchlist (
 
 -- Insert default admin user
 -- INSERT INTO users (name, email, password, role, is_confirmed) VALUES 
--- ('Admin', 'admin@example.com', 'RUN-THE-HASH-THEN-PASTE-HERE', 'admin', 1);
+-- ('Admin', 'admin@test.com', 'run the hash.php, then put pw here', 'admin', 1);

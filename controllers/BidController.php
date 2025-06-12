@@ -31,25 +31,23 @@
          */
         public function place()
         {
-            // Check if user is logged in
+            // yada yada validation start
             if (!$this->isLoggedIn()) {
                 $this->setErrorMessage('You must be logged in to place bids.');
                 $this->redirect(BASE_URL . 'login');
                 return;
             }
 
-            // Check if request method is POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $this->redirect(BASE_URL);
                 return;
             }
 
-            // Get and validate input
             $lot_id = isset($_POST['lot_id']) ? (int) $_POST['lot_id'] : 0;
             $bid_amount = isset($_POST['bid_amount']) ? (int) $_POST['bid_amount'] : 0;
             $max_amount = isset($_POST['max_amount']) && !empty($_POST['max_amount']) ? (int) $_POST['max_amount'] : null;
 
-            // Get lot information
+            // get lot info
             $lot = $this->lotModel->getById($lot_id);
 
             if (!$lot) {
@@ -58,14 +56,14 @@
                 return;
             }
 
-            // Check if auction is live
+            // check if auction is live
             if ($lot['auction_status'] !== 'live') {
                 $this->setErrorMessage('Bidding is only allowed on live auctions.');
                 $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
                 return;
             }
 
-            // Get current highest bidder information before placing new bid
+            // get current highest bidder info before placing new bid
             $currentHighestBid = $this->bidModel->getCurrentHighestBid($lot_id);
             $outbidUserId = null;
 
@@ -73,24 +71,24 @@
                 $outbidUserId = $currentHighestBid['user_id'];
             }
 
-            // Calculate minimum bid amount
+            // calculate minimum bid amount
             $minimumBid = $this->bidModel->getNextMinimumBid($lot['current_price']);
 
-            // Validate bid amount
+            // validate bid amount
             if ($bid_amount < $minimumBid) {
                 $this->setErrorMessage('Your bid must be at least ' . $minimumBid . '€. The bid increment for this price range is ' . $this->bidModel->getBidIncrement($lot['current_price']) . '€.');
                 $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
                 return;
             }
 
-            // Validate max amount if provided
+            // validate max amount if provided
             if ($max_amount !== null && $max_amount < $bid_amount) {
                 $this->setErrorMessage('Maximum bid amount must be greater than or equal to your bid amount.');
                 $this->redirect(BASE_URL . 'lots/view?id=' . $lot_id);
                 return;
             }
 
-            // Place the bid
+            // here we place the bid
             $bidData = [
                 'user_id' => $_SESSION['user_id'],
                 'lot_id' => $lot_id,
@@ -101,10 +99,10 @@
             $bidId = $this->bidModel->placeBid($bidData);
 
             if ($bidId) {
-                // Process proxy bidding
+                // process proxy bidding
                 $proxyResult = $this->bidModel->processProxyBidding($lot_id, 0);
 
-                // Send outbid notification to the previous highest bidder if exists
+                // send outbid notification to the previous highest bidder if exists
                 if ($outbidUserId && $outbidUserId != $_SESSION['user_id']) {
                     $outbidUser = $this->userModel->getById($outbidUserId);
                     if ($outbidUser) {
@@ -156,7 +154,7 @@
                 return;
             }
 
-            // Verify lot exists
+            // verify lot exists
             $lot = $this->lotModel->getById($lot_id);
             if (!$lot) {
                 $this->setErrorMessage('Lot not found.');
@@ -164,7 +162,7 @@
                 return;
             }
 
-            // Add to watchlist
+            // add to watchlist
             $result = $this->watchlistModel->add($_SESSION['user_id'], $lot_id);
 
             if ($result) {
@@ -173,7 +171,7 @@
                 $this->setErrorMessage('There was an error adding this lot to your watchlist.');
             }
 
-            // Redirect back to the auction/lot page
+            // redirect back to the auction/lot page
             $this->redirect(BASE_URL . 'auctions/' . $lot['auction_id'] . '/lots/' . $lot_id);
         }
 
@@ -182,34 +180,34 @@
          */
         public function removeFromWatchlist($lot_id = null)
         {
-            // Check if user is logged in
+            // check if user is logged in
             if (!$this->isLoggedIn()) {
                 $this->setErrorMessage('You must be logged in to manage your watchlist.');
                 $this->redirect(BASE_URL . 'login');
                 return;
             }
 
-            // Ensure POST 
+            // ensure post 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $this->setErrorMessage('Invalid request method.');
-                $this->redirectBack();
+                $this->redirect(BASE_URL . 'auctions');
                 return;
             }
 
-            // Get lot_id from parameter (from route)
+            // get lot_id from parameter (from route)
             $lot_id = (int) $lot_id;
 
             if (!$lot_id) {
                 $this->setErrorMessage('Lot ID is required.');
-                $this->redirectBack();
+                $this->redirect(BASE_URL . 'auctions');
                 return;
             }
 
-            // Fetch lot details to get auction_id for redirect, and to ensure lot exists
+            // fetch lot details to get auction_id for redirect, and to ensure lot exists
             $lot = $this->lotModel->getById($lot_id);
             if (!$lot) {
                 $this->setErrorMessage('Lot not found.');
-                // If lot not found, redirect to a general page, or user's watchlist if that's the referer
+                // if lot not found, redirect to a general page, or user's watchlist if that's the referer
                 $referer = $_SERVER['HTTP_REFERER'] ?? '';
                 if (strpos($referer, 'user/watchlist') !== false) {
                     $this->redirect(BASE_URL . 'user/watchlist');
@@ -219,7 +217,7 @@
                 return;
             }
 
-            // Remove from watchlist
+            // remove from watchlist
             $result = $this->watchlistModel->remove($_SESSION['user_id'], $lot_id);
 
             if ($result) {
@@ -228,12 +226,12 @@
                 $this->setErrorMessage('There was an error removing this lot from your watchlist.');
             }
 
-            // Check if we're coming from the watchlist page
+            // check if we're coming from the watchlist page
             $referer = $_SERVER['HTTP_REFERER'] ?? '';
             if (strpos($referer, 'user/watchlist') !== false) {
                 $this->redirect(BASE_URL . 'user/watchlist');
             } else {
-                // Redirect back to the auction/lot page
+                // redirect back to the auction/lot page
                 $this->redirect(BASE_URL . 'auctions/' . $lot['auction_id'] . '/lots/' . $lot_id);
             }
         }
@@ -243,7 +241,7 @@
          */
         public function watchlist()
         {
-            // Check if user is logged in
+            // check if user is logged in
             if (!$this->isLoggedIn()) {
                 $this->setErrorMessage('You must be logged in to view your watchlist.');
                 $this->redirect(BASE_URL . 'login');
@@ -261,7 +259,7 @@
         }
 
         /**
-         * Send winning notifications when an auction ends
+         * here we send winning notifications when an auction ends
          * 
          * @param int $auction_id The auction ID
          * @param bool $shouldRedirect Whether to redirect after sending notifications
@@ -270,7 +268,6 @@
          */
         public function sendWinningNotifications($auction_id, $shouldRedirect = true, $bypassAdminCheck = false)
         {
-            // Check if user is admin or has appropriate permissions
             if (!$bypassAdminCheck && !$this->isAdmin()) {
                 $this->setErrorMessage('You do not have permission to perform this action.');
                 if ($shouldRedirect) {
@@ -279,16 +276,16 @@
                 return false;
             }
 
-            // Get all lots in the auction
+            // get all lots in the auction
             $lots = $this->lotModel->getByAuctionId($auction_id);
             $sentCount = 0;
 
             foreach ($lots as $lot) {
-                // Get the winning bid for the lot (bid with status 'won')
+                // get the winning bid for the lot (bid with status 'won')
                 $winningBid = $this->bidModel->getWinningBidByStatus($lot['id'], 'won');
 
                 if ($winningBid) {
-                    // Get the winning user's details
+                    // get the winning user's details
                     $winner = $this->userModel->getById($winningBid['user_id']);
 
                     if ($winner) {
@@ -304,6 +301,7 @@
                             $sentCount++;
                         } catch (Exception $e) {
                             error_log("Failed to send winning notification: " . $e->getMessage());
+                            //check
                         }
                     }
                 }

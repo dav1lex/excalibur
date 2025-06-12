@@ -22,12 +22,10 @@ class LotController extends BaseController
     }
 
     /**
-     * Show individual lot page
+     * Show individual lot page public view
      */
     public function view($id = null)
     {
-        // $this->ensureAdmin(); // Assuming view is public, commented out for now. Confirm if admin-only.
-
         if (!$id) {
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
         }
@@ -40,7 +38,7 @@ class LotController extends BaseController
             return;
         }
 
-        // Get auction info
+        
         $auction = $this->auctionModel->getById($lot['auction_id']);
 
         // Add auction status and dates
@@ -48,14 +46,14 @@ class LotController extends BaseController
         $auction['auction_start_date'] = $auction['start_date'];
         $auction['auction_end_date'] = $auction['end_date'];
 
-        // Get related lots
+        //  related lots pull
         $relatedLots = $this->lotModel->getRelated($lot['auction_id'], $id, 4);
 
-        // Get bid history
+        // get bid history
         $bidModel = new Bid();
-        $bids = $bidModel->getByLotId($id, 10); // Get the 10 most recent bids
+        $bids = $bidModel->getByLotId($id, 10); // show 10 mosot bids
 
-        // Check if the lot is in user's watchlist
+        // see if the lot is in user's watchlist
         $inWatchlist = false;
         if ($this->isLoggedIn()) {
             $watchlistModel = new Watchlist();
@@ -74,7 +72,7 @@ class LotController extends BaseController
     }
 
     /**
-     * Admin: Create lot form
+     * Admin: Create lot f  orm
      */
     public function create($auction_id = null)
     {
@@ -120,7 +118,7 @@ class LotController extends BaseController
     }
 
     /**
-     * Admin: Store new lot
+     * Admin: add new lot
      */
     public function store()
     {
@@ -139,17 +137,16 @@ class LotController extends BaseController
         $lot_number = $_POST['lot_number'] ?? '';
         $starting_price = isset($_POST['starting_price']) ? (int) $_POST['starting_price'] : 0;
 
-        // Basic validation
         if (empty($title) || empty($description) || empty($lot_number) || $starting_price <= 0) {
             $this->setErrorMessage('Please fill in all required fields with valid values');
             $this->redirect(BASE_URL . 'lots/create?auction_id=' . $auction_id);
             return;
         }
 
-        // Format lot number as LOT-XXX
+        // Format lot number as LOT-XXX, so basically user puts just number 1,20 or 120, and it will be formatted to LOT-001, LOT-020, LOT-120
         $lot_number = sprintf("LOT-%03d", (int) $lot_number);
 
-        // Check if lot number already exists for this auction
+        // check if lot  already exists for this auction
         $lots = $this->lotModel->getByAuctionId($auction_id);
         foreach ($lots as $lot) {
             if ($lot['lot_number'] === $lot_number) {
@@ -159,7 +156,7 @@ class LotController extends BaseController
             }
         }
 
-        // Process image if uploaded
+        // Process image
         $image_path = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             // Configure file upload
@@ -173,13 +170,13 @@ class LotController extends BaseController
             $target_file = $target_dir . $new_filename;
 
             // Check file size
-            if ($_FILES['image']['size'] > 6000000) { // 6MB
+            if ($_FILES['image']['size'] > 6000000) { // 6MB, also already declared in config.php
                 $this->setErrorMessage('Sorry, your file is too large (max 6MB)');
                 $this->redirect(BASE_URL . 'lots/create?auction_id=' . $auction_id);
                 return;
             }
 
-            // Only allow jpg and png
+            // Only jpg and png
             $allowed_types = ['jpg', 'jpeg', 'png'];
             if (!in_array(strtolower($file_extension), $allowed_types)) {
                 $this->setErrorMessage('Sorry, only JPG and PNG files are allowed');
@@ -187,7 +184,7 @@ class LotController extends BaseController
                 return;
             }
 
-            // Upload file
+            // Upload 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 $image_path = $target_file;
             } else {
@@ -235,8 +232,6 @@ class LotController extends BaseController
             $this->redirect(BASE_URL . 'admin/auctions');
             return;
         }
-
-        // Get auction info
         $auction = $this->auctionModel->getById($lot['auction_id']);
 
         $this->render('admin/edit_lot', [
@@ -275,7 +270,7 @@ class LotController extends BaseController
 
         $auction_id = $lot['auction_id'];
 
-        // Validate and sanitize input
+        // Validate
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         $lot_number = $_POST['lot_number'] ?? '';
@@ -287,10 +282,10 @@ class LotController extends BaseController
             return;
         }
 
-        // Format lot number as LOT-XXX
+        // Format lot number as LOT-XXX, so basically user puts just number 1,20 or 120, and it will be formatted to LOT-001, LOT-020, LOT-120
         $lot_number = sprintf("LOT-%03d", (int) $lot_number);
 
-        // Check if lot number already exists for this auction (excluding current lot)
+        // check if lot  already exists (excluding current lot)
         $lots = $this->lotModel->getByAuctionId($auction_id);
         foreach ($lots as $existingLot) {
             if ($existingLot['lot_number'] === $lot_number && $existingLot['id'] != $id) {
@@ -326,7 +321,7 @@ class LotController extends BaseController
             $target_file = $target_dir . $new_filename;
 
             // Check file size
-            if ($_FILES['image']['size'] > 6000000) { // 6MB
+            if ($_FILES['image']['size'] > 6000000) { // 6MB, also already declared in config.php
                 $this->setErrorMessage('Sorry, your file is too large (max 6MB)');
                 $this->redirect(BASE_URL . 'lots/edit/' . $id);
                 return;
@@ -344,7 +339,7 @@ class LotController extends BaseController
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 $lotData['image_path'] = $target_file;
 
-                // Delete old image if exists
+                // Delete old one if exists
                 if (!empty($lot['image_path'])) {
                     $this->deleteLotImage($lot['image_path']);
                 }
@@ -355,7 +350,7 @@ class LotController extends BaseController
             }
         }
 
-        // Update lot
+        // update lot
         $result = $this->lotModel->update($id, $lotData);
 
         if ($result) {
@@ -407,7 +402,6 @@ class LotController extends BaseController
 
         $auction_id = $lot['auction_id'];
 
-        // Delete lot image if exists
         if (!empty($lot['image_path'])) {
             $this->deleteLotImage($lot['image_path']);
         }

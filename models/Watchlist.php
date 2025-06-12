@@ -9,9 +9,9 @@ class Watchlist extends BaseModel
      */
     public function add($user_id, $lot_id)
     {
-        // Check if already in watchlist
+        // check if already in watchlist
         if ($this->isInWatchlist($user_id, $lot_id)) {
-            return true; // Already in watchlist, consider it a success
+            return true; // already in watchlist
         }
 
         $sql = "INSERT INTO watchlist (user_id, lot_id, created_at) VALUES (:user_id, :lot_id, NOW())";

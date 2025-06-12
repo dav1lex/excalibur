@@ -39,7 +39,8 @@ class AuctionController extends BaseController
                 $title = 'Past Auctions';
                 break;
             default:
-                // Get all auctions except drafts for public view
+                // By default, we show all auctions except 'drafts'.
+                // This keeps unfinished auctions from showing up on the public site.
                 $auctions = $this->auctionModel->getAllPublic();
                 $title = 'All Auctions';
         }
@@ -53,11 +54,10 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Displays an auction page or a specific lot page within an auction.
-     * This method acts as a dispatcher based on the provided URL parameters.
+     * This function is smart. It can show a whole auction page OR a single lot page.
      *
-     * Route: GET /auctions/{auction_id}
-     * Route: GET /auctions/{auction_id}/lots/{lot_id}
+     * Example URL for a whole auction: /auctions/12
+     * Example URL for a single lot:   /auctions/12/lots/5
      *
      * @param string|int $auction_id_from_url The ID of the auction from the URL.
      * @param string|int|null $lot_id_from_url (Optional) The ID of the lot from the URL.
@@ -83,7 +83,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Prepares data and renders the auction detail page.
+     *  function to show the main page for an auction, with all its lots listed.
      *
      * @param array $auction The auction data.
      */
@@ -100,7 +100,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Prepares data and renders the lot detail page.
+     *  function to show the detailed page for just one lot.
      *
      * @param array $auction The parent auction data.
      * @param int $lot_id The ID of the lot to display.
@@ -127,7 +127,7 @@ class AuctionController extends BaseController
             $inWatchlist = $watchlistModel->isInWatchlist($user['id'], $lot_id);
         }
 
-        // Fetch other lots in the same auction, excluding the current one
+        // We want to show "related items", so we grab all other lots from the same auction.
         $allLotsInAuction = $this->lotModel->getByAuctionId($auction['id']);
         $relatedLots = array_filter($allLotsInAuction, function ($related_lot_item) use ($lot_id) {
             return $related_lot_item['id'] != $lot_id;
@@ -136,23 +136,22 @@ class AuctionController extends BaseController
         $data = [
             'title' => $current_lot['title'] . ' - ' . $auction['title'] . ' - ' . SITE_NAME,
             'lot' => $current_lot,
-            'auction' => $auction, // Pass the parent auction data for context
+            'auction' => $auction,
             'bids' => $bids,
             'user' => $user,
             'inWatchlist' => $inWatchlist,
             'relatedLots' => $relatedLots
         ];
 
-        // The 'lots/view.php' template is used to display the lot details.
-        // It expects $auction data for auction status, dates, etc. (which is already included)
-        // and $lot data for the specific lot details.
+        // The 'lots/view.php' template shows all the details for a single lot.
+        // It needs both the $lot data and the parent $auction data for things like checking the auction status or end date.
         $this->render('lots/view', $data);
     }
 
     /**
 
     /**
-     * Admin: Create auction form
+     * Admin: Create auction 
      */
     public function create()
     {
@@ -166,7 +165,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Admin: Store new auction
+     * Admin: Takes the info from the 'create auction' form and saves it to the database.
      */
     public function store()
     {
@@ -190,14 +189,14 @@ class AuctionController extends BaseController
         $status = $_POST['status'] ?? 'draft';
         $image_path = null;
 
-        // Basic validation
+        // Simple check to make sure the important fields aren't empty.
         if (empty($title) || empty($description) || empty($start_date) || empty($end_date)) {
             $this->setErrorMessage('Please fill in all required fields');
             $this->redirect(BASE_URL . 'auctions/create');
             return;
         }
 
-        // Handle image upload if present
+        // If an image was uploaded, handle it.
         if (isset($_FILES['auction_image']) && $_FILES['auction_image']['error'] === UPLOAD_ERR_OK) {
             $image_path = $this->handleImageUpload($_FILES['auction_image'], 'auctions');
             if (!$image_path) {
@@ -227,7 +226,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Admin: Edit auction form
+     * Admin: Shows the page for editing an existing auction.
      */
     public function edit($id = null)
     {
@@ -262,7 +261,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Admin: Update auction
+     * Admin: Takes the new info from the 'edit auction' form and updates the database.
      */
     public function update($id = null)
     {
@@ -273,7 +272,7 @@ class AuctionController extends BaseController
             return;
         }
 
-        // If id is not in the path, get it from query params
+        // The ID can come from the URL path (like /edit/12) or a query string (?id=12). Made it flexible.
         if (!$id && isset($_GET['id'])) {
             $id = (int) $_GET['id'];
         }
@@ -292,20 +291,19 @@ class AuctionController extends BaseController
         $end_date = $_POST['end_date'] ?? '';
         $status = $_POST['status'] ?? 'draft';
 
-        // Basic validation
         if (empty($title) || empty($description) || empty($start_date) || empty($end_date)) {
             $this->setErrorMessage('Please fill in all required fields');
             $this->redirect(BASE_URL . 'auctions/edit/' . $id);
             return;
         }
 
-        // Get current auction data for image comparison
+        // Get the current auction data to find the old image path.
         $currentAuction = $this->auctionModel->getById($id);
         $image_path = $currentAuction['image_path'];
 
-        // Handle image upload if present
+        // If a new image is uploaded, deal with it.
         if (isset($_FILES['auction_image']) && $_FILES['auction_image']['error'] === UPLOAD_ERR_OK) {
-            // Delete old image if exists
+            // A new image was uploaded, so let's delete the old one first.
             if (!empty($image_path)) {
                 $this->deleteAuctionImage($image_path);
             }
@@ -338,7 +336,11 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Handle image upload for auctions
+     * Takes an uploaded image, checks if it's okay (size, type), and saves it.
+     *
+     * @param array $file The $_FILES entry for the uploaded image.
+     * @param string $folder The destination folder inside 'public/uploads/'.
+     * @return string|false The path to the saved file if it worked, or false if it failed.
      */
     private function handleImageUpload($file, $folder)
     {
@@ -349,22 +351,21 @@ class AuctionController extends BaseController
             mkdir($upload_dir, 0755, true);
         }
 
-        // Check file size (6MB max)
+        // Max file size is 6MB. Don't want people uploading huge files.
         if ($file['size'] > 6 * 1024 * 1024) {
             return false;
         }
 
-        // Check file type
+        // Only allow common image types.
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!in_array($file['type'], $allowed_types)) {
             return false;
         }
 
-        // Generate unique filename
+        // Create a unique filename so we don't accidentally overwrite anything.
         $filename = uniqid() . '_' . basename($file['name']);
         $filepath = $upload_dir . $filename;
 
-        // Move uploaded file
         if (move_uploaded_file($file['tmp_name'], $filepath)) {
             return $filepath;
         }
@@ -373,26 +374,27 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Delete auction image from server
+     * Deletes an image file from the server.
      * 
-     * @param string $image_path Path to the image file
-     * @return bool True if deletion was successful or file doesn't exist, false otherwise
+     * @param string $image_path Path to the image file.
+     * @return bool True if it worked or the file was already gone. False if there was an error.
      */
     private function deleteAuctionImage($image_path)
     {
         if (empty($image_path)) {
-            return true; // No image to delete
+            return true; // Nothing to do.
         }
         
         if (file_exists($image_path)) {
+            // The @ symbol stops PHP from throwing a warning if it fails. Less noise.
             return @unlink($image_path);
         }
         
-        return true; // File doesn't exist, so consider deletion successful
+        return true; // If the file isn't there, it's already "deleted". So that's a success.
     }
 
     /**
-     * Admin: Delete auction
+     * Admin: Deletes an auction from the database and also deletes its image.
      */
     public function delete($id = null)
     {
@@ -403,7 +405,8 @@ class AuctionController extends BaseController
             $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
         }
 
-        // Check if auction has any lots
+        // IMPORTANT: You can't delete an auction if it still has lots inside.
+        // This is to stop us from having "orphaned" lots that belong to nothing.
         $lots = $this->lotModel->getByAuctionId($id);
         if (count($lots) > 0) {
             $this->setErrorMessage('Cannot delete auction with lots. Please remove all lots first.');
@@ -427,7 +430,7 @@ class AuctionController extends BaseController
     }
 
     /**
-     * Admin: End auction and send winning notifications
+     * Admin: Lets an admin manually end a 'live' auction and send emails to winners.
      */
     public function endAuction($id = null)
     {
@@ -445,7 +448,7 @@ class AuctionController extends BaseController
             return;
         }
 
-        // Can only end live auctions
+        // You can only manually end an auction that is 'live'. Makes sense.
         if ($auction['status'] !== 'live') {
             $this->setErrorMessage('Only live auctions can be ended manually.');
             $this->redirect(BASE_URL . 'admin/auctions');
@@ -458,7 +461,8 @@ class AuctionController extends BaseController
         ]);
 
         if ($result) {
-            // Get BidController to send winning notifications
+            // The BidController handles sending winner emails, so we call it here to do its job.
+            // This keeps the code for auctions separate from the code for bidding.
             require_once 'controllers/BidController.php';
             $bidController = new BidController();
             $bidController->sendWinningNotifications($id, true, false);

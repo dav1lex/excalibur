@@ -9,7 +9,7 @@ class User extends BaseModel {
     }
     
     public function create($name, $email, $password, $role = 'user') {
-        // Generate a confirmation token
+        // generate a confirmation token
         $confirmationToken = $this->generateConfirmationToken();
         
         $query = "INSERT INTO users (name, email, password, role, confirmation_token) VALUES (:name, :email, :password, :role, :token)";
@@ -44,7 +44,7 @@ class User extends BaseModel {
         $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         
-        // Bind parameters
+        // bind params
         foreach ($data as $key => $value) {
             if ($key === 'password') {
                 $value = password_hash($value, PASSWORD_DEFAULT);
@@ -69,7 +69,7 @@ class User extends BaseModel {
         $user = $this->getByEmail($email);
         
         if ($user && password_verify($password, $user['password'])) {
-            // Check if email is confirmed
+            // check if email is confirmed
             if ($user['is_confirmed'] == 0) {
                 return 'unconfirmed';
             }
@@ -113,6 +113,7 @@ class User extends BaseModel {
     
     private function generateConfirmationToken() {
         return bin2hex(random_bytes(32));
+        //bin2hex stronk
     }
     
     /**

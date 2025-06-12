@@ -5,10 +5,10 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# Security: Prevent directory listing
+# Prevent directory listing
 Options -Indexes
 
-# Security: Prevent access to sensitive files
+# Prevent access to sensitive files
 <FilesMatch "^\.htaccess|config\.php|database\.sql">
     Order allow,deny
     Deny from all

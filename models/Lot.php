@@ -59,7 +59,7 @@ class Lot extends BaseModel
     }
 
     /**
-     * Get related lots from same auction, excluding current lot
+     * random lots from same auc, excluding current one
      */
     public function getRelated($auction_id, $exclude_id, $limit = 4)
     {
@@ -70,7 +70,7 @@ class Lot extends BaseModel
                 LIMIT :limit";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':auction_id', $auction_id, PDO::PARAM_INT);
-        $stmt->bindParam(':exclude_id', $exclude_id, PDO::PARAM_INT);
+        $stmt->bindParam(':exclude_id', $exclude_id, PDO::PARAM_INT); //mf excluded
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -87,10 +87,10 @@ class Lot extends BaseModel
 
         $stmt = $this->conn->prepare($sql);
 
-        // Set starting price as current price initially
+        // initialy set starting price as current price
         $current_price = $data['starting_price'];
 
-        // Bind all parameters
+        // bind all params
         $stmt->bindParam(':auction_id', $data['auction_id'], PDO::PARAM_INT);
         $stmt->bindParam(':title', $data['title'], PDO::PARAM_STR);
         $stmt->bindParam(':description', $data['description'], PDO::PARAM_STR);
@@ -98,7 +98,7 @@ class Lot extends BaseModel
         $stmt->bindParam(':starting_price', $data['starting_price'], PDO::PARAM_INT);
         $stmt->bindParam(':current_price', $current_price, PDO::PARAM_INT);
 
-
+        //bind null, else bind the path
 
         if ($data['image_path'] === null || $data['image_path'] === '') {
             $stmt->bindValue(':image_path', null, PDO::PARAM_NULL);
@@ -183,38 +183,39 @@ class Lot extends BaseModel
 
     /**
      * Search lots by description, title or lot number
+     * needs improvement
      */
     public function search($search, $auction_id = null)
     {
-        // Simple search query with basic conditions
+        //  search query with basic conditions
         $sql = "SELECT l.*, a.title as auction_title 
                 FROM lots l 
                 JOIN auctions a ON l.auction_id = a.id 
                 WHERE l.title LIKE ? OR l.description LIKE ?";
 
-        // Add lot number search for numeric values
+        // Add lot number, ex: 123, 1234,
         if (is_numeric($search)) {
             $lot_number = 'LOT-' . sprintf("%03d", (int) $search);
             $sql .= " OR l.lot_number = ?";
         }
 
-        // Add auction filter if provided
+        // auction filter if provided
         if ($auction_id) {
             $sql .= " AND l.auction_id = ?";
         }
 
-        // Add ordering
+        // ordering
         $sql .= " ORDER BY l.lot_number ASC";
 
-        // Prepare statement
+        // prepare statement
         $stmt = $this->conn->prepare($sql);
 
-        // Create parameters array
+        // create params array
         $params = [];
         $params[] = '%' . $search . '%';  // For title
         $params[] = '%' . $search . '%';  // For description
 
-        // Add lot number parameter if needed
+        // add lot  param if needed
         if (is_numeric($search)) {
             $params[] = 'LOT-' . sprintf("%03d", (int) $search);
         }

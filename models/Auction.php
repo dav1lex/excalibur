@@ -28,7 +28,7 @@ class Auction extends BaseModel
     }
 
     /**
-     * Get all public auctions (excluding drafts)
+     * Get all auctions (excluding drafts)
      */
     public function getAllPublic($limit = null, $offset = 0)
     {
@@ -129,7 +129,7 @@ class Auction extends BaseModel
     }
 
     /**
-     * Update an auction
+     * Update  auction
      */
     public function update($id, $data)
     {
@@ -183,6 +183,7 @@ class Auction extends BaseModel
     /**
      * Update auction statuses based on start_date and end_date
      * This handles auction transitions and sends winning notifications
+     * this mf , read slowly
      */
     public function updateStatuses()
     {

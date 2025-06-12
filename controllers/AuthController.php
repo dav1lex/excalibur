@@ -16,7 +16,7 @@ class AuthController extends BaseController
 
     public function login()
     {
-        // If user is already logged in, redirect to appropriate dashboard
+        // If user is already logged in, redirect to his dashboard
         if ($this->isLoggedIn()) {
             $this->redirectToDashboard();
             return;
@@ -69,7 +69,7 @@ class AuthController extends BaseController
 
     public function register()
     {
-        // If user is already logged in, redirect to appropriate dashboard
+        // If user is already logged in, redirect to his dashboard
         if ($this->isLoggedIn()) {
             $this->redirectToDashboard();
             return;
@@ -92,7 +92,7 @@ class AuthController extends BaseController
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        // Validate input
+        // Validate
         if (empty($name) || empty($email) || empty($password) || empty($confirmPassword)) {
             $this->setErrorMessage('Please fill in all fields');
             $this->redirect(BASE_URL . 'register');
@@ -105,14 +105,14 @@ class AuthController extends BaseController
             return;
         }
 
-        // Check if email already exists
+        // Check email exists
         if ($this->userModel->getByEmail($email)) {
             $this->setErrorMessage('Email already exists');
             $this->redirect(BASE_URL . 'register');
             return;
         }
 
-        // Create new user
+        // new user
         $result = $this->userModel->create($name, $email, $password);
 
         if ($result) {
@@ -213,10 +213,9 @@ class AuthController extends BaseController
 
     public function logout()
     {
-        // Unset all session variables
+        // Unset 
         $_SESSION = [];
-
-        // Destroy the session
+        // Destroy
         session_destroy();
 
         $this->redirect(BASE_URL);
@@ -224,7 +223,7 @@ class AuthController extends BaseController
 
     public function forgotPassword()
     {
-        // If user is already logged in, redirect to appropriate dashboard
+        // If user is already logged in, redirect to his dashboard
         if ($this->isLoggedIn()) {
             $this->redirectToDashboard();
             return;
@@ -328,7 +327,7 @@ class AuthController extends BaseController
         }
     }
 
-    // Helper method to redirect users to their appropriate dashboard
+    // this function redirects admin/user to dashb
     private function redirectToDashboard()
     {
         if ($_SESSION['user_role'] === 'admin') {

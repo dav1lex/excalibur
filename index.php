@@ -1,7 +1,8 @@
 <?php
 session_start();
+// load all
 
-//  config file
+//  config 
 require_once 'config/config.php';
 
 //  Database and Router 
@@ -25,6 +26,7 @@ require_once 'models/Lot.php';
 require_once 'models/Bid.php';
 require_once 'models/Watchlist.php'; 
 
+// base path
 $basePath = '';
 if (isset($_ENV['BASE_PATH'])) {
     $basePath = $_ENV['BASE_PATH'];
@@ -33,10 +35,8 @@ if (isset($_ENV['BASE_PATH'])) {
     $basePath = ($scriptName === '/' || $scriptName === '\\') ? '' : $scriptName;
 }
 
-//  Router instance
+//  Router 
 $router = new Router($basePath);
-
-// routes
 
 // Home 
 $router->get('/', [HomeController::class, 'index']);
@@ -115,9 +115,9 @@ $router->notFound(function() {
     include_once 'views/layouts/footer.php';
 });
 
-// Update auction statuses before resolving routes
+// update auction statuses before resolving routes
 $auctionModel = new Auction();
 $auctionModel->updateStatuses();
 
-// Resolve the route
+// resolve, so if user goes to /auctions/1, it will go to the auction controller and the index method
 $router->resolve(); 
