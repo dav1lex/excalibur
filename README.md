@@ -26,5 +26,5 @@ This is a auction platform built with PHP.The project is built with a simple str
 - Password: admin123
 
 ## live link
-[https://titandoce.pl/test](https://titandoce.pl/test)
+[https://titancode.pl/test](https://titancode.pl/test)
 
