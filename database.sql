@@ -11,10 +11,6 @@ DROP TABLE IF EXISTS watchlist;
 
 SET foreign_key_checks = 1;
 
--- Create database
-CREATE DATABASE IF NOT EXISTS nanobid;
-USE nanobid;
-
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,

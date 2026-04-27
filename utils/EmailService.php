@@ -3,235 +3,152 @@ require_once 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
 
 class EmailService
 {
-    private $mailer;
+    private $mailer = null;
+    private $enabled = false;
 
     public function __construct()
     {
-        $this->mailer = new PHPMailer(true);
-        // put your details in .env, 
-        $this->mailer->isSMTP();
-        $this->mailer->Host = $_ENV['SMTP_HOST']; 
-        $this->mailer->SMTPAuth = true;
-        $this->mailer->Username = $_ENV['SMTP_USERNAME']; //  email acc or username
-        $this->mailer->Password = $_ENV['SMTP_PASSWORD']; 
-        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mailer->Port = $_ENV['SMTP_PORT'];
+        // SMTP not configured — skip silently
+        if (empty($_ENV['SMTP_HOST'])) {
+            return;
+        }
 
-        // Sender, me
-        $this->mailer->setFrom(
-            $_ENV['SMTP_FROM_EMAIL'], 
-            $_ENV['SMTP_FROM_NAME']
-        );
+        $this->mailer = new PHPMailer(true);
+        $this->mailer->isSMTP();
+        $this->mailer->Host = $_ENV['SMTP_HOST'];
+        $this->mailer->SMTPAuth = true;
+        $this->mailer->Username = $_ENV['SMTP_USERNAME'] ?? '';
+        $this->mailer->Password = $_ENV['SMTP_PASSWORD'] ?? '';
+        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $this->mailer->Port = $_ENV['SMTP_PORT'] ?? 587;
+
+        $fromEmail = $_ENV['SMTP_FROM_EMAIL'] ?? '';
+        $fromName = $_ENV['SMTP_FROM_NAME'] ?? '';
+
+        if (!empty($fromEmail)) {
+            $this->mailer->setFrom($fromEmail, $fromName);
+            $this->enabled = true;
+        }
+    }
+
+    private function sendOrFail($email, $name, $subject, $htmlBody, $textBody)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+        try {
+            $this->mailer->clearAllRecipients();
+            $this->mailer->clearAttachments();
+            $this->mailer->addAddress($email, $name);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = $subject;
+            $this->mailer->Body = $htmlBody;
+            $this->mailer->AltBody = $textBody;
+            return $this->mailer->send();
+        } catch (Exception $e) {
+            error_log("Email error: {$this->mailer->ErrorInfo}");
+            return false;
+        }
     }
 
     public function sendConfirmationEmail($email, $name, $token)
     {
-        try {
-            // Recipients
-            $this->mailer->addAddress($email, $name);
+        $confirmUrl = BASE_URL . 'confirm-email?token=' . $token;
 
-            // Content
-            $this->mailer->isHTML(true);
-            $this->mailer->Subject = 'Confirm Your Email Address';
+        $html = '
+            <html><head><style>
+                body{font-family:Arial,sans-serif;line-height:1.6}
+                .container{max-width:600px;margin:0 auto;padding:20px}
+                .button{display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px}
+            </style></head><body>
+            <div class="container">
+                <h2>Welcome to NanoBid!</h2>
+                <p>Hello ' . htmlspecialchars($name) . ',</p>
+                <p>Thank you for registering. Please confirm your email address by clicking the button below:</p>
+                <p><a href="' . $confirmUrl . '" class="button">Confirm Email</a></p>
+                <p>Or copy and paste: ' . $confirmUrl . '</p>
+                <p>This link will expire in 24 hours.</p>
+                <p>Regards,<br>The NanoBid Team</p>
+            </div></body></html>';
 
-            $confirmUrl = BASE_URL . 'confirm-email?token=' . $token;
+        $text = "Hello $name,\n\nThank you for registering. Confirm your email: $confirmUrl\n\nRegards,\nThe NanoBid Team";
 
-            $this->mailer->Body = '
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>Welcome to NanoBid!</h2>
-                        <p>Hello ' . htmlspecialchars($name) . ',</p>
-                        <p>Thank you for registering. Please confirm your email address by clicking the button below:</p>
-                        <p><a href="' . $confirmUrl . '" class="button">Confirm Email</a></p>
-                        <p>Or copy and paste this link into your browser:</p>
-                        <p>' . $confirmUrl . '</p>
-                        <p>This link will expire in 24 hours.</p>
-                        <p>If you did not create an account, no further action is required.</p>
-                        <p>Regards,<br>The NanoBid Team</p>
-                    </div>
-                </body>
-                </html>
-            ';
-
-            $this->mailer->AltBody = 'Hello ' . $name . ', 
-                Thank you for registering. Please confirm your email address by clicking this link: ' . $confirmUrl . '
-                This link will expire in 24 hours.
-                If you did not create an account, no further action is required.
-                Regards,
-                The NanoBid Team';
-
-            return $this->mailer->send();
-        } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
-            return false;
-        }
+        return $this->sendOrFail($email, $name, 'Confirm Your Email Address', $html, $text);
     }
 
     public function sendPasswordResetEmail($email, $name, $token)
     {
-        try {
-            // Recipients
-            $this->mailer->addAddress($email, $name);
+        $resetUrl = BASE_URL . 'reset-password?token=' . $token;
 
-            // Content
-            $this->mailer->isHTML(true);
-            $this->mailer->Subject = 'Reset Your Password';
+        $html = '
+            <html><head><style>
+                body{font-family:Arial,sans-serif;line-height:1.6}
+                .container{max-width:600px;margin:0 auto;padding:20px}
+                .button{display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px}
+            </style></head><body>
+            <div class="container">
+                <h2>Password Reset Request</h2>
+                <p>Hello ' . htmlspecialchars($name) . ',</p>
+                <p>Click below to reset your password:</p>
+                <p><a href="' . $resetUrl . '" class="button">Reset Password</a></p>
+                <p>Or copy and paste: ' . $resetUrl . '</p>
+                <p>This link will expire in 24 hours.</p>
+                <p>Regards,<br>The NanoBid Team</p>
+            </div></body></html>';
 
-            $resetUrl = BASE_URL . 'reset-password?token=' . $token;
+        $text = "Hello $name,\n\nReset your password: $resetUrl\n\nRegards,\nThe NanoBid Team";
 
-            $this->mailer->Body = '
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>Password Reset Request</h2>
-                        <p>Hello ' . htmlspecialchars($name) . ',</p>
-                        <p>You requested to reset your password. Click the button below to reset it:</p>
-                        <p><a href="' . $resetUrl . '" class="button">Reset Password</a></p>
-                        <p>Or copy and paste this link into your browser:</p>
-                        <p>' . $resetUrl . '</p>
-                        <p>This link will expire in 24 hours.</p>
-                        <p>If you did not request a password reset, please ignore this email.</p>
-                        <p>Regards,<br>The NanoBid Team</p>
-                    </div>
-                </body>
-                </html>
-            ';
-
-            $this->mailer->AltBody = 'Hello ' . $name . ', 
-                You requested to reset your password. Please click this link to reset it: ' . $resetUrl . '
-                This link will expire in 24 hours.
-                If you did not request a password reset, please ignore this email.
-                Regards,
-                The NanoBid Team';
-
-            return $this->mailer->send();
-        } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
-            return false;
-        }
+        return $this->sendOrFail($email, $name, 'Reset Your Password', $html, $text);
     }
 
     public function sendOutbidNotification($email, $name, $lotTitle, $lotId)
     {
-        try {
-            // Clear all addresses and attachments for reuse
-            $this->mailer->clearAllRecipients();
-            $this->mailer->clearAttachments();
-            
-            // Recipients
-            $this->mailer->addAddress($email, $name);
+        $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
 
-            // Content
-            $this->mailer->isHTML(true);
-            $this->mailer->Subject = 'You have been outbid on ' . $lotTitle;
+        $html = '
+            <html><head><style>
+                body{font-family:Arial,sans-serif;line-height:1.6}
+                .container{max-width:600px;margin:0 auto;padding:20px}
+                .button{display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px}
+            </style></head><body>
+            <div class="container">
+                <h2>You\'ve Been Outbid!</h2>
+                <p>Hello ' . htmlspecialchars($name) . ',</p>
+                <p>Someone placed a higher bid on <strong>' . htmlspecialchars($lotTitle) . '</strong>.</p>
+                <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
+                <p>Place a new bid to stay in the game!</p>
+                <p>Regards,<br>The NanoBid Team</p>
+            </div></body></html>';
 
-            $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
+        $text = "Hello $name,\n\nSomeone outbid you on \"$lotTitle\". View: $lotUrl\n\nRegards,\nThe NanoBid Team";
 
-            $this->mailer->Body = '
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>You\'ve Been Outbid!</h2>
-                        <p>Hello ' . htmlspecialchars($name) . ',</p>
-                        <p>Someone has placed a higher bid on item <strong>' . htmlspecialchars($lotTitle) . '</strong> that you were bidding on.</p>
-                        <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
-                        <p>Don\'t miss out! Place a new bid now to stay in the game.</p>
-                        <p>Regards,<br>The NanoBid Team</p>
-                    </div>
-                </body>
-                </html>
-            ';
-
-            $this->mailer->AltBody = 'Hello ' . $name . ', 
-                Someone has placed a higher bid on item "' . $lotTitle . '" that you were bidding on.
-                You can view the item and place a new bid here: ' . $lotUrl . '
-                Don\'t miss out!
-                Regards,
-                The NanoBid Team';
-            
-            return $this->mailer->send();
-        } catch (Exception $e) {
-            error_log("Failed to send outbid notification: " . $e->getMessage());
-            return false;
-        }
+        return $this->sendOrFail($email, $name, 'You have been outbid on ' . $lotTitle, $html, $text);
     }
 
     public function sendWinningNotification($email, $name, $lotTitle, $lotId, $winningAmount)
     {
-        try {
-                // clear all addresses and attachments for reuse
-            $this->mailer->clearAllRecipients();
-            $this->mailer->clearAttachments();
-            $this->mailer->addAddress($email, $name);
+        $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
 
-            $this->mailer->isHTML(true);
-            $this->mailer->Subject = 'Congratulations! You won ' . $lotTitle;
+        $html = '
+            <html><head><style>
+                body{font-family:Arial,sans-serif;line-height:1.6}
+                .container{max-width:600px;margin:0 auto;padding:20px}
+                .button{display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px}
+            </style></head><body>
+            <div class="container">
+                <h2>Congratulations!</h2>
+                <p>Hello ' . htmlspecialchars($name) . ',</p>
+                <p>You won <strong>' . htmlspecialchars($lotTitle) . '</strong> with bid of ' . htmlspecialchars($winningAmount) . '€.</p>
+                <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
+                <p>We\'ll contact you with payment/shipping details.</p>
+                <p>Regards,<br>The NanoBid Team</p>
+            </div></body></html>';
 
-            $lotUrl = BASE_URL . 'lots/view?id=' . $lotId;
+        $text = "Hello $name,\n\nCongratulations! You won \"$lotTitle\" with $winningAmount€. View: $lotUrl\n\nRegards,\nThe NanoBid Team";
 
-            $this->mailer->Body = '
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>Congratulations!</h2>
-                        <p>Hello ' . htmlspecialchars($name) . ',</p>
-                        <p>You are the winning bidder for <strong>' . htmlspecialchars($lotTitle) . '</strong> with a bid of ' . htmlspecialchars($winningAmount) . '€.</p>
-                        <p><a href="' . $lotUrl . '" class="button">View Item</a></p>
-                        <p>Our team will be in contact shortly with payment and shipping details.</p>
-                        <p>Thank you for participating in our auction!</p>
-                        <p>Regards,<br>The NanoBid Team</p>
-                    </div>
-                </body>
-                </html>
-            ';
-
-            $this->mailer->AltBody = 'Hello ' . $name . ', 
-                Congratulations! You are the winning bidder for "' . $lotTitle . '" with a bid of ' . $winningAmount . '€.
-                You can view the item details here: ' . $lotUrl . '
-                Thank you for participating in our auction!
-                Regards,
-                The NanoBid Team';
-            
-            return $this->mailer->send();
-        } catch (Exception $e) {
-            error_log("Failed to send winning notification: " . $e->getMessage());
-            return false;
-        }
+        return $this->sendOrFail($email, $name, 'Congratulations! You won ' . $lotTitle, $html, $text);
     }
 }

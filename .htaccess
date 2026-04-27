@@ -16,10 +16,3 @@ Options -Indexes
 
 # Set default charset and language
 AddDefaultCharset UTF-8
-
-# PHP settings
-<IfModule mod_php7.c>
-    php_flag display_errors off
-    php_value post_max_size 8M
-    php_value upload_max_filesize 6M
-</IfModule> 

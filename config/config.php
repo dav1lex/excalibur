@@ -19,7 +19,7 @@ define('BASE_URL', $_ENV['BASE_URL']);  // Update lateer
 //  Upload 
 define('MAX_FILE_SIZE', 6 * 1024 * 1024); // 6MB
 define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png']);
-define('UPLOAD_DIR', $_SERVER['DOCUMENT_ROOT'] . '/public/uploads/images/');
+define('UPLOAD_DIR', dirname(__DIR__) . '/public/uploads/images/');
 
 // Session 
 define('SESSION_LIFETIME', 60 * 60 * 1); // 1 hour 
